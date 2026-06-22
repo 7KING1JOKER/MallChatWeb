@@ -26,7 +26,7 @@
 
 ### 后端项目
 
-后端地址：`E:\Learn_zone\Code_zone\IDEA_code\community-platform\`
+后端地址：[community_platform](https://github.com/zzmkxd/community_platform)
 
 后端技术栈：Java 21 + Spring Boot 3.3.5 + Spring Cloud 2023.0.3 + Nacos + MySQL + Redis + RocketMQ + Elasticsearch + MinIO + Netty WebSocket
 
@@ -355,39 +355,6 @@ Phase 5 → 收尾完善               (文件上传/搜索/未读/测试)      
 ```
 
 每个 Phase 结束条件：`pnpm build` 通过 + 本阶段页面可交互验证。
-
-### 三人分工
-
-| 人员 | 职责 | 核心文件 |
-|------|------|----------|
-| **人员 A** — 基础通信层 | types + urls + apis + enums + wsType + websocket | 10 个文件，定义整个项目的"语言" |
-| **人员 B** — 状态逻辑层 | stores + utils + hooks | 16 个文件，最复杂的业务逻辑层 |
-| **人员 C** — 视图交互层 | views + router + components + useUpload | ~47 个文件，文件最多 |
-
-```
-依赖关系：
-  人员A (基础通信层)
-   types + urls + apis + enums + wsType + websocket
-   ─────────────────────────
-        │              │
-        ▼              ▼
-  人员B (状态逻辑层)  人员C (视图交互层)
-   stores + utils     views + router
-   + hooks            + components + useUpload
-```
-
----
-
-## 下一步
-
-- [ ] Phase 0：API 层对齐（types + urls + apis + enums）
-- [ ] Phase 1：WebSocket 协议升级（wsType + websocket）
-- [ ] Phase 2：Store 重构（chat / server / global / user / emoji）
-- [ ] Phase 3：基础视图（ServerList + ChannelList + ChatList + ChatBox）
-- [ ] Phase 4：高级功能（Thread / Reaction / 成员管理 / 角色权限 / 文件上传）
-- [ ] Phase 5：收尾完善（搜索 / 未读追踪 / 在线状态 / 冒烟测试）
-
----
 
 ## License
 
