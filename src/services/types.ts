@@ -1,411 +1,538 @@
 /**
- * 类型定义文件
+ * 社群平台前端 — 类型定义文件
+ *
+ * 所有类型与后端 DTO/VO 字段严格对齐。
  * 注意：请使用TSDoc规范进行注释，以便在使用时能够获得良好提示。
  * @see TSDoc规范https://tsdoc.org/
- **/
-import type {
-  ActEnum,
-  IsYetEnum,
-  MarkEnum,
-  MsgEnum,
-  OnlineEnum,
-  RoomTypeEnum,
-  SexEnum,
-} from '@/enums'
+ */
 
-/***/
-export type ListResponse<T extends unknown> = {
-  /** 游标（下次翻页带上这参数）*/
+// ==================== 通用 ====================
+
+/** 游标分页通用响应（替换旧 ListResponse） */
+export type CursorPage<T> = {
+  /** 游标（下次翻页带上此参数），空字符串表示最后一页 */
   cursor: string
   /** 是否最后一页 */
   isLast: boolean
   list: T[]
 }
 
-export type CacheBadgeReq = {
-  /** 最后更新时间 更新超过 10 分钟异步去更新。 */
-  lastModifyTime?: number
-  /** 徽章 ID */
-  itemId: number
+// ==================== 枚举 ====================
+
+/**
+ * 13 位权限位图 (BIGINT 位掩码)
+ * 与后端 PermissionBit.java 严格对齐
+ */
+export enum PermissionBit {
+  CREATE_INVITE = 0x0001,       // 1     — 创建邀请
+  KICK_MEMBERS = 0x0002,        // 2     — 踢出成员
+  BAN_MEMBERS = 0x0004,         // 4     — 封禁成员
+  ADMINISTRATOR = 0x0008,       // 8     — 管理员（全部权限）
+  MANAGE_CHANNELS = 0x0010,     // 16    — 管理频道
+  MANAGE_SERVER = 0x0020,       // 32    — 管理服务器
+  ADD_REACTIONS = 0x0040,       // 64    — 添加反应
+  SEND_MESSAGES = 0x0080,       // 128   — 发送消息
+  USE_THREADS = 0x0100,         // 256   — 使用话题
+  EMBED_LINKS = 0x0200,         // 512   — 嵌入链接
+  ATTACH_FILES = 0x0400,        // 1024  — 上传文件
+  MENTION_EVERYONE = 0x0800,    // 2048  — @全体成员
+  MANAGE_ROLES = 0x1000,        // 4096  — 管理角色
 }
 
-export type GroupDetailReq = {
-  /** 群头像 */
-  avatar: string
-  /** 群名称 */
-  groupName: string
-  /** 在线人数 */
-  onlineNum: number
-  /** 成员角色 1群主 2管理员 3普通成员 4踢出群聊 */
-  role: number
-  /** 房间id */
-  roomId: number
+/**
+ * 消息类型枚举
+ * 与后端 MessageTypeEnum.java 严格对齐
+ */
+export enum MessageType {
+  TEXT = 1,     // 文本消息
+  IMAGE = 2,    // 图片消息
+  FILE = 3,     // 文件消息
+  SYSTEM = 4,   // 系统消息
+  SOUND = 5,    // 语音消息
+  EMOJI = 6,    // 表情消息
 }
 
-export type CacheBadgeItem = {
-  /** 是否需要更新数据源。 */
-  needRefresh?: boolean
-  /** 最后更新时间 更新超过 10 分钟异步去更新。 */
-  lastModifyTime: number
-  /** 徽章说明 */
-  describe: string
-  /** 徽章图标 */
-  img: string
-  /** 徽章 ID */
-  itemId: number
+/**
+ * 频道类型枚举
+ * 与后端 ChannelTypeEnum.java 严格对齐
+ */
+export enum ChannelType {
+  TEXT = 0,     // 文字频道
+  VOICE = 1,    // 语音频道（预留）
 }
 
-export type CacheUserReq = {
-  /** 最后更新时间 更新超过 10 分钟异步去更新。 */
-  lastModifyTime?: number
-  /** uid */
-  uid: number
-}
+// ==================== 用户 ====================
 
-export type CacheUserItem = {
-  /** 是否需要更新数据源。 */
-  needRefresh?: boolean
-  /** 最后更新时间 更新超过 10 分钟异步去更新。 */
-  lastModifyTime: number
-  /** 获得的徽章 */
-  itemIds: number[]
-  /** 佩戴的徽章 */
-  wearingItemId: number
-  /** 归属地 */
-  locPlace: string
-  /** 头像 */
-  avatar: string
-  /** 最后一次上下线时间 */
-  lastOptTime: number
-  /** 用户名称 */
-  name: string
-  /** uid */
-  uid: number
-}
-
-export type UserItem = {
-  /** 在线状态 */
-  activeStatus: OnlineEnum
-  /** 头像 */
-  avatar: string
-  /** 最后一次上下线时间 */
-  lastOptTime: number
-  /** 用户名称 */
-  name: string
-  /** 角色ID */
-  roleId?: number
-  /** uid */
-  uid: number
-}
-
-export type GroupStatisticType = {
-  /** 在线人数 */
-  onlineNum: number
-  /** 总人数 */
-  totalNum: number
-}
-
-export type MessageReplyType = {
-  /** 是否可消息跳转 0否 1是 */
-  canCallback: number
-  /** 是否可消息跳转 0否 1是 */
-  content: string
-  /** 跳转间隔的消息条数 */
-  gapCount: number
-  /** 消息id */
+/** 用户信息（对应后端 UserVO） */
+export type UserVO = {
+  /** 用户 ID */
   id: number
-  /** 用户名称 */
-  username: string
-}
-
-export type MarkMsgReq = {
-  // actType	动作类型 1确认 2取消
-  actType: ActEnum
-  // 标记类型 1点赞 2举报
-  markType: MarkEnum
-  // 消息 ID
-  msgId: number
-}
-
-export type UserInfoType = {
-  /** 用户唯一标识 */
-  uid: number
-  /** 用户头像 */
-  avatar: string
+  /** JWT Token（注册/登录时返回） */
+  token?: string
   /** 用户名 */
-  name: string
-  /** 剩余改名次数 */
-  modifyNameChance: number
-  /** 性别 1为男性，2为女性 */
-  sex: SexEnum
-  /** 徽章，本地字段，有值用本地，无值用远端 */
-  badge?: string
-  /** 权限 */
-  power?: number
-}
-
-export type BadgeType = {
-  // 徽章描述
-  describe: string
-  // 徽章id
-  id: number
-  // 徽章图标
-  img: string
-  // 是否拥有 0否 1是
-  obtain: IsYetEnum
-  // 是否佩戴 0否 1是
-  wearing: IsYetEnum
-}
-
-export type MarkItemType = {
-  /** 操作用户 */
-  uid: number
-  /** 消息id */
-  msgId: number
-  /** 操作类型 1点赞 2举报 */
-  markType: MarkEnum
-  /** 数量 */
-  markCount: number
-  /** 动作类型 1确认 2取消 */
-  actType: ActEnum
-}
-
-export type RevokedMsgType = {
-  /** 消息ID */
-  msgId: number
-  /** 会话ID */
-  roomId?: number
-  /** 撤回人ID */
-  recallUid?: number
-}
-
-export type EmojiItem = {
-  expressionUrl: string
-  id: number
-}
-
-// -------------------- ⬇消息体类型定义⬇ ----------------
-
-/**
- * 消息返回体
- */
-export type MessageType = {
-  /** 发送者信息 */
-  fromUser: MsgUserType
-  /** 消息主体 */
-  message: MsgType
-  /** 发送时间 */
-  sendTime: string
-  /** 时间段（可选） */
-  timeBlock?: string
-  /** 是否加载中 */
-  loading?: boolean
-}
-
-/**
- * 消息中用户信息
- */
-export type MsgUserType = {
-  /** 用户ID */
-  uid: number
-  /** 用户名 */
-  username: string
-  /** 头像 */
+  username?: string
+  /** 昵称 */
+  nickname: string
+  /** 头像 URL */
   avatar: string
-  /** 归属地 */
-  locPlace: string
-  /** 徽章 */
-  badge?: {
-    /** 徽章地址 */
-    img: string
-    /** 描述 */
-    describe: string // 描述
-  }
+  /** 邮箱 */
+  email?: string
+  /** 微信 openId */
+  openId?: string
+  /** 微信 unionId */
+  unionId?: string
+  /** 性别（0=未设置 1=男 2=女） */
+  sex?: number
+  /** 状态 */
+  status?: number
+  /** 创建时间 */
+  createTime?: string
 }
 
-/**
- * 消息互动信息
- */
-export type MessageMarkType = {
-  /** 点赞 */
-  userLike: number
-  /** 举报 */
-  userDislike: number
-  /** 点赞数 */
-  likeCount: number
-  /** 举报数 */
-  dislikeCount: number
-}
+// ==================== Server / Category / Channel ====================
 
-/** 图片消息体 */
-export type ImageBody = {
-  size: number
-  url: string
-  width: number
-  height: number
-}
-/** 语音消息体 */
-export type VoiceBody = {
-  size: number
-  second: number
-  url: string
-}
-/** 视频 */
-export type VideoBody = {
-  size: number
-  url: string
-  thumbSize?: number
-  thumbWidth?: number
-  thumbHeight?: number
-  thumbUrl?: string
-}
-/** 文件消息体 */
-export type FileBody = {
-  size: number
-  fileName: string
-  url: string
-}
-/** 文本消息体 */
-export type TextBody = {
-  /** 消息内容 */
-  content: string
-  /** 回复 */
-  reply: ReplyType
-  /**
-   * 消息链接映射
-   */
-  urlContentMap: Record<
-    string,
-    {
-      title: string
-      description: string
-      image: string
-    }
-  >
-}
-/** 表情消息 */
-export type EmojiBody = {
-  url: string
-}
-
-/**
- * 消息内容
- */
-export type MsgType = {
-  /** 消息ID */
+/** 服务器基本信息（对应后端 ServerVO） */
+export type ServerVO = {
+  /** 服务器 ID */
   id: number
-  /**  房间 ID */
-  roomId: number
-  /** 消息类型 */
-  type: MsgEnum
-  /** 动态消息体-`根据消息类型变化` */
-  body: TextBody | ImageBody | VoiceBody | VideoBody | FileBody | EmojiBody | any
-  /** 发送时间戳 */
-  sendTime: number
-  /** 消息互动信息 */
-  messageMark: MessageMarkType
-}
-
-export type ReplyType = {
-  id: number
-  username: string
-  type: MsgEnum
-  /** 根据不同类型回复的消息展示也不同-`过渡版` */
-  body: any
-  /**
-   * 是否可消息跳转
-   * @enum {number}  `0`否 `1`是
-   */
-  canCallback: number
-  /** 跳转间隔的消息条数  */
-  gapCount: number
+  /** 服务器名称 */
+  name: string
+  /** 描述 */
+  description?: string
+  /** 图标 URL */
+  icon?: string
+  /** 创建者 ID */
+  ownerId: number
+  /** 成员数量 */
+  memberCount?: number
+  /** 创建时间 */
+  createTime?: string
 }
 
 /**
- * 发送消息载体
+ * 服务器详情（GET /api/v1/servers/{id} 返回）
+ * 对应后端 ServerDetailVO
  */
-export type MessageReq = {
-  /** 会话id */
-  roomId: number
-  /** 消息类型 */
-  msgType: MsgEnum
-  /** 消息体 */
-  body: {
-    /** 文本消息内容 */
-    content?: string
-    /** 回复的消息id */
-    replyMsgId?: number
-    /** 任意 */
-    [key: string]: any
-  }
+export type ServerDetailVO = {
+  /** 服务器基本信息 */
+  server: ServerVO
+  /** 分类列表（嵌套频道） */
+  categories: CategoryVO[]
+  /** 我在该服务器的角色列表 */
+  myRoles: RoleVO[]
 }
 
-/** 申请状态 */
-export enum RequestFriendAgreeStatus {
-  /** 1待审批 */
-  Waiting = 1,
-  /** 2同意 */
-  Agree,
+/** 分类（对应后端 CategoryVO） */
+export type CategoryVO = {
+  /** 分类 ID */
+  id: number
+  /** 分类名称 */
+  name: string
+  /** 排序 */
+  sortOrder?: number
+  /** 分类下的频道列表 */
+  channels: ChannelVO[]
 }
 
-/** 请求添加好友的列表项 */
-export type RequestFriendItem = {
-  /** 申请id */
-  applyId: number
-  /** 申请信息 */
-  msg: string
-  /** 申请状态 1待审批 2同意 */
-  status: RequestFriendAgreeStatus
-  /** 申请类型 1加好友 */
+/** 频道（对应后端 ChannelVO） */
+export type ChannelVO = {
+  /** 频道 ID */
+  id: number
+  /** 频道名称 */
+  name: string
+  /** 频道类型（TEXT=0, VOICE=1） */
   type: number
-  /** 申请人uid */
-  uid: number
-  /** 会话 ID */
-  roomId: number
-}
-/** 联系人的列表项 */
-export type ContactItem = {
-  /** 在线状态 1在线 2离线 */
-  activeStatus: OnlineEnum
-  /** 最后一次上下线时间 */
-  lastOptTime: number
-  uid: number
+  /** 频道简介 */
+  topic?: string
+  /** 排序 */
+  sortOrder?: number
 }
 
-/** 是否全员展示的会话 0否 1是 */
-export enum IsAllUserEnum {
-  /** 0否 */
-  Not,
-  /** 1是 */
-  Yes,
-}
+// ==================== Member / Role / Permission ====================
 
-/** 会话列表项 */
-export type SessionItem = {
-  /** 房间最后活跃时间(用来排序) */
-  activeTime: number
-  /** 会话头像 */
+/** 成员（对应后端 MemberVO） */
+export type MemberVO = {
+  /** 成员 ID（即 userId） */
+  userId: number
+  /** 昵称 */
+  nickname: string
+  /** 头像 URL */
   avatar: string
-  /** 是否全员展示的会话 0否 1是 */
-  hot_Flag: IsAllUserEnum
-  /** 会话名称 */
+  /** 服务器内昵称 */
+  serverNickname?: string
+  /** 成员状态 */
+  status?: number
+  /** 角色列表 */
+  roles: RoleVO[]
+}
+
+/** 角色（对应后端 RoleVO） */
+export type RoleVO = {
+  /** 角色 ID */
+  id: number
+  /** 角色名称 */
   name: string
-  /** 房间id */
-  roomId: number
-  /** 最新消息 */
-  text: string
-  /** 房间类型 1群聊 2单聊 */
-  type: RoomTypeEnum
-  /** 未读数 */
+  /** 角色颜色（字符串格式，如 "#FF0000"） */
+  color?: string
+  /** 权限位掩码（13 位） */
+  permissions: number
+  /** 角色等级 */
+  position?: number
+}
+
+/** 频道权限覆盖（对应后端 ChannelPermissionVO） */
+export type ChannelPermissionVO = {
+  /** 覆盖 ID */
+  id: number
+  /** 频道 ID */
+  channelId: number
+  /** 目标类型: 0=角色, 1=用户 */
+  targetType: number
+  /** 角色 ID 或 用户 ID */
+  targetId: number
+  /** 允许的权限位 */
+  allowBits: number
+  /** 拒绝的权限位 */
+  denyBits: number
+}
+
+// ==================== Message / Thread / Reaction ====================
+
+/** 消息发送者（MessageVO 内嵌） */
+export type MessageUserVO = {
+  id: number
+  nickname: string
+  avatar: string
+}
+
+/** Thread 摘要（MessageVO 内嵌） */
+export type ThreadSummaryVO = {
+  id: number
+  name: string
+  messageCount: number
+}
+
+/** 消息（对应后端 MessageVO） */
+export type MessageVO = {
+  /** 消息 ID */
+  id: number
+  /** 频道 ID */
+  channelId: number
+  /** 话题 ID（null=频道主时间线） */
+  threadId: number | null
+  /** 发送者 */
+  fromUser: MessageUserVO
+  /** 消息内容（Markdown） */
+  content: string
+  /** 消息类型（对应 MessageType 枚举值） */
+  msgType: number
+  /** 消息状态: 0=正常 1=删除 2=编辑过 */
+  status?: number
+  /** 回复的消息 ID */
+  replyMsgId?: number | null
+  /** 附件列表 */
+  attachments?: FileVO[]
+  /** Reaction 列表 */
+  reactions?: ReactionVO[]
+  /** Thread 摘要（如果有） */
+  thread?: ThreadSummaryVO
+  /** 创建时间 */
+  createTime?: string
+  /** 更新时间 */
+  updateTime?: string
+}
+
+/** 话题（对应后端 ThreadVO） */
+export type ThreadVO = {
+  /** 话题 ID */
+  id: number
+  /** 频道 ID */
+  channelId: number
+  /** 触发消息 ID */
+  rootMsgId: number
+  /** 话题名称 */
+  name: string
+  /** 创建者 */
+  creator?: UserVO
+  /** 状态: ACTIVE / ARCHIVED */
+  status: string
+  /** 消息数 */
+  messageCount?: number
+  /** 最后活跃时间 */
+  lastActive?: string
+  /** 创建时间 */
+  createTime?: string
+}
+
+/** Reaction（对应后端 ReactionVO） */
+export type ReactionVO = {
+  /** emoji 字符 */
+  emoji: string
+  /** 数量 */
+  count: number
+  /** 添加该反应的部分用户 ID（截断展示） */
+  userIds: number[]
+  /** 当前用户是否已添加 */
+  reacted: boolean
+}
+
+// ==================== 文件 / Emoji / Invite / 未读 ====================
+
+/** 文件（对应后端 FileVO） */
+export type FileVO = {
+  /** 文件 ID */
+  id: number
+  /** 文件名 */
+  fileName: string
+  /** 文件大小（字节） */
+  fileSize: number
+  /** MIME 类型 */
+  mimeType: string
+  /** 图片宽度（图片才有） */
+  width?: number
+  /** 图片高度（图片才有） */
+  height?: number
+  /** 状态: PENDING / UPLOADED */
+  status?: string
+  /** 下载链接（预签名，仅 UPLOADED 状态有效） */
+  downloadUrl?: string
+}
+
+/** 预签名上传响应 */
+export type PresignedResp = {
+  uploadUrl: string
+  fileId: number
+}
+
+/** 表情（对应后端 EmojiVO） */
+export type EmojiVO = {
+  /** 表情 ID */
+  id: number
+  /** 服务器 ID */
+  serverId: number
+  /** 表情名称 */
+  name: string
+  /** 图片 URL */
+  url: string
+  /** 上传者 ID */
+  creatorId?: number
+  /** 创建时间 */
+  createTime?: string
+}
+
+/** 邀请链接（对应后端 InviteVO） */
+export type InviteVO = {
+  /** 邀请 ID */
+  id: number
+  /** 服务器 ID */
+  serverId: number
+  /** 创建者 ID */
+  inviterId: number
+  /** 邀请码 */
+  code: string
+  /** 最大使用次数 (0=不限) */
+  maxUses?: number
+  /** 已使用次数 */
+  usedCount?: number
+  /** 过期时间 (null=永不过期) */
+  expireTime?: string | null
+  /** 状态: 0=失效 1=有效 */
+  status?: number
+  /** 创建时间 */
+  createTime?: string
+}
+
+/** 未读计数（频道已读状态） */
+export type UnreadVO = {
+  channelId: number
   unreadCount: number
 }
 
-/** 消息已读未读数列表项 */
-export type MsgReadUnReadCountType = {
-  /** 消息 ID */
-  msgId: number
-  /** 已读数 */
-  readCount: number
-  /** 未读数 */
-  unReadCount: number | null
+// ==================== 请求类型 ====================
+
+/** 创建频道请求 */
+export type CreateChannelReq = {
+  categoryId?: number
+  name: string
+  type: number       // ChannelType.TEXT / ChannelType.VOICE
+  topic?: string
 }
+
+/** 更新频道请求 */
+export type UpdateChannelReq = {
+  name?: string
+  topic?: string
+}
+
+/** 创建角色请求 */
+export type CreateRoleReq = {
+  name: string
+  color?: string
+  permissions: number
+  position?: number
+}
+
+/** 更新角色请求 */
+export type UpdateRoleReq = {
+  name?: string
+  color?: string
+  permissions?: number
+}
+
+/** 设置频道权限覆盖请求 */
+export type SetPermReq = {
+  targetType: number
+  targetId: number
+  allowBits: number
+  denyBits: number
+}
+
+/** 语音消息元数据 */
+export type SoundMsgDTO = {
+  /** 语音文件 URL */
+  audioUrl: string
+  /** 文件大小（字节） */
+  size: number
+  /** 语音时长（秒） */
+  second: number
+}
+
+/** 发送消息请求 */
+export type SendMsgReq = {
+  content: string
+  msgType: number
+  threadId?: number
+  replyMsgId?: number
+  fileIds?: number[]
+  /** 语音消息元数据（msgType=SOUND 时必填） */
+  soundMsg?: SoundMsgDTO
+}
+
+/** 创建 Thread 请求 */
+export type CreateThreadReq = {
+  rootMsgId: number
+  name?: string
+}
+
+/** 更新 Thread 请求 */
+export type UpdateThreadReq = {
+  name?: string
+  status?: 'ACTIVE' | 'ARCHIVED'
+}
+
+/** 消息搜索参数 */
+export type SearchParams = {
+  q: string
+  channelId?: number
+  from?: string
+  to?: string
+  page?: number
+}
+
+/** 更新成员昵称请求 */
+export type UpdateMemberNicknameReq = {
+  nickname: string
+}
+
+/** 转让 ownership 请求 */
+export type TransferOwnershipReq = {
+  newOwnerId: number
+}
+
+/** 鉴权 — 用户名+密码登录请求（对应后端 LoginReq） */
+export type LoginReq = {
+  /** 用户名（必填） */
+  username: string
+  /** 密码（必填，明文，后端 BCrypt 验证） */
+  password: string
+}
+
+/** 鉴权 — 微信绑定请求（对应后端 AccountBindReq） */
+export type AccountBindReq = {
+  /** WeChat OAuth2 code */
+  code?: string
+  /** 直接传入 openId（测试用，绕过 code 交换） */
+  openId?: string
+}
+
+/** 鉴权 — Token 刷新请求 */
+export type RefreshTokenReq = {
+  token: string
+}
+
+/** 鉴权 — Token 刷新响应 */
+export type RefreshTokenResp = {
+  token: string
+}
+
+// ==================== 临时兼容类型（待 B/C 重构完成后删除） ====================
+
+/** @deprecated 旧版消息体类型，Person B/C 重构后删除 */
+export type MsgType = any
+/** @deprecated 旧版消息类型，Person B/C 重构后删除 */
+export type MessageType = any
+/** @deprecated 旧版文本消息体，Person C 重构 RenderMessage 后删除 */
+export type TextBody = any
+/** @deprecated 旧版图片消息体，Person C 重构 RenderMessage 后删除 */
+export type ImageBody = any
+/** @deprecated 旧版语音消息体，Person C 重构 RenderMessage 后删除 */
+export type VoiceBody = any
+/** @deprecated 旧版视频消息体，Person C 重构 RenderMessage 后删除 */
+export type VideoBody = any
+/** @deprecated 旧版文件消息体，Person C 重构 RenderMessage 后删除 */
+export type FileBody = any
+/** @deprecated 旧版表情消息体，Person C 重构 RenderMessage 后删除 */
+export type EmojiBody = any
+/** @deprecated 旧版消息标记，Person B 重构 chatStore 后删除 */
+export type MarkItemType = any
+/** @deprecated 旧版撤回消息类型，Person B 重构 chatStore 后删除 */
+export type RevokedMsgType = any
+/** @deprecated 旧版会话列表项，Person B 重构 store 后删除 */
+export type SessionItem = any
+/** @deprecated 旧版联系人，Person B 重构 store 后删除 */
+export type ContactItem = any
+/** @deprecated 旧版好友请求，Person B 重构 store 后删除 */
+export type RequestFriendItem = any
+/** @deprecated 旧版好友请求状态，Person B 重构 contacts store 后删除 */
+export enum RequestFriendAgreeStatus {
+  Waiting = 1,
+  Agree,
+}
+/** @deprecated 旧版用户信息类型，Person B 重构 userStore 后删除 */
+export type UserInfoType = any
+/** @deprecated 旧版徽章类型，Person C 重构 UserSettingBox 后删除 */
+export type BadgeType = any
+/** @deprecated 旧版群详情，Person B 重构 serverStore 后删除 */
+export type GroupDetailReq = any
+/** @deprecated 旧版群统计，Person B 重构 serverStore 后删除 */
+export type GroupStatisticType = any
+/** @deprecated 旧版用户列表项，Person B/C 重构后删除 */
+export type UserItem = any
+/** @deprecated 旧版缓存用户，Person B 重构 cachedStore 后删除 */
+export type CacheUserItem = any
+/** @deprecated 旧版缓存用户请求，Person B 重构 cachedStore 后删除 */
+export type CacheUserReq = any
+/** @deprecated 旧版徽章缓存请求，Person B 重构 cachedStore 后删除 */
+export type CacheBadgeReq = any
+/** @deprecated 旧版徽章缓存项，Person B 重构 cachedStore 后删除 */
+export type CacheBadgeItem = any
+/** @deprecated 旧版消息回复类型，Person C 重构后删除 */
+export type MessageReplyType = any
+/** @deprecated 旧版消息标记请求，Person B 重构 useLikeToggle 后删除 */
+export type MarkMsgReq = any
+/** @deprecated 旧版消息请求，Person B 重构 chatStore 后删除 */
+export type MessageReq = any
+/** @deprecated 旧版标记项，Person B 重构 chatStore 后删除 */
+export type MarkItemType_v2 = any
+/** @deprecated 旧版已读未读，Person B 重构 chatStore 后删除 */
+export type MsgReadUnReadCountType = any
+/** @deprecated 旧版表情项，Person B 重构 emojiStore 后删除 */
+export type EmojiItem = any
+/** @deprecated 旧版全体用户会话标记，Person B 重构 chatStore 后删除 */
+export enum IsAllUserEnum { Not, Yes }
+/** @deprecated 旧版消息互动，Person B 重构 chatStore 后删除 */
+export type MessageMarkType = any
+/** @deprecated 旧版回复类型，Person C 重构 RenderMessage 后删除 */
+export type ReplyType = any
+/** @deprecated 旧版消息发送者类型，Person C 重构 MsgItem 后删除 */
+export type MsgUserType = any
