@@ -4,31 +4,28 @@
  * 定义规则：
  *  枚举名：XxxEnum
  *  枚举值：全部大写，单词间用下划线分割
+ *
+ * 与后端枚举严格对齐
  */
 /** -------------------------------------- */
 
 /**
  * 消息类型
+ * 与后端 MessageTypeEnum.java 对齐
  */
 export enum MsgEnum {
-  /** 未知 */
-  UNKNOWN,
   /** 文本 */
-  TEXT,
-  /** 撤回 */
-  RECALL,
+  TEXT = 1,
   /** 图片 */
-  IMAGE,
+  IMAGE = 2,
   /** 文件 */
-  FILE,
-  /** 语音 */
-  VOICE,
-  /** 视频 */
-  VIDEO,
-  /** 表情包 */
-  EMOJI,
+  FILE = 3,
   /** 系统消息 */
-  SYSTEM,
+  SYSTEM = 4,
+  /** 语音 */
+  SOUND = 5,
+  /** 表情 */
+  EMOJI = 6,
 }
 
 /**
@@ -66,12 +63,31 @@ export enum IsYetEnum {
   YES,
 }
 
+// ==================== 已废弃（临时兼容，待 B/C 重构后删除） ====================
+
+/** @deprecated 被 PermissionBit RBAC 替代 */
 export enum MarkEnum {
   LIKE = 1,
   DISLIKE,
 }
 
-// 成员角色 1群主 2管理员 3普通成员 4踢出群聊
+/** @deprecated 被 Server/Channel 结构替代 */
+export enum RoomTypeEnum {
+  /** 1群聊 */
+  Group = 1,
+  /** 2单聊 */
+  Single,
+}
+
+/** @deprecated 被 WS type=30/31 替代 */
+export enum ChangeTypeEnum {
+  /** 1 加入群组 */
+  JOIN = 1,
+  /** 2 移除群组 */
+  REMOVE,
+}
+
+/** @deprecated 被 PermissionBit RBAC 替代 */
 export enum RoleEnum {
   /** 1群主 */
   LORD = 1,
@@ -81,20 +97,4 @@ export enum RoleEnum {
   NORMAL,
   /** 4踢出群聊 */
   REMOVED,
-}
-
-/** 房间类型 1群聊 2单聊 */
-export enum RoomTypeEnum {
-  /** 1群聊 */
-  Group = 1,
-  /** 2单聊 */
-  Single,
-}
-
-/** 变更类型 1 加入群组，2： 移除群组 */
-export enum ChangeTypeEnum {
-  /** 1 加入群组 */
-  JOIN = 1,
-  /** 2 移除群组 */
-  REMOVE,
 }

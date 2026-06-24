@@ -15,7 +15,7 @@ export const useWsLoginStore = defineStore('wsLogin', () => {
   const showLogin = ref(false)
   const loginStatus = ref(LoginStatus.Init)
   function getLoginQrCode() {
-    wsIns.send({ type: WsRequestMsgType.RequestLoginQrCode })
+    wsIns.send({ type: WsRequestMsgType.LOGIN })
   }
   function resetLoginState() {
     loginQrCode.value = undefined
