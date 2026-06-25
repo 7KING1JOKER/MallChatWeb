@@ -12,6 +12,10 @@ export const useUserStore = defineStore('user', () => {
   if (!Object.keys(userInfo.value).length && Object.keys(localUserInfo).length) {
     userInfo.value = localUserInfo
   }
+  // 有 token 说明已登录
+  if (localStorage.getItem('TOKEN')) {
+    isSign.value = true
+  }
 
   async function getUserMeAction() {
     try {

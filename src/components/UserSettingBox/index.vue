@@ -18,6 +18,15 @@ const userInfo = computed(() => userStore.userInfo)
 watchEffect(() => { if (value.value) userStore.getUserMeAction() })
 
 const onEditName = () => { editName.isEdit = true; editName.tempName = userInfo.value.nickname || '' }
+
+function logout() {
+  userStore.isSign = false
+  userStore.userInfo = {}
+  localStorage.removeItem('TOKEN')
+  localStorage.removeItem('USER_INFO')
+  value.value = false
+  ElMessage.success('已退出登录')
+}
 const onSaveUserName = async () => {
   if (!editName.tempName || editName.tempName.trim() === '') { ElMessage.warning('昵称不能为空哦~'); return }
   if (editName.tempName === userInfo.value.nickname) { ElMessage.warning('昵称和当前一样的哦~'); return }
@@ -48,6 +57,7 @@ const onCancelEditName = () => { editName.saving = false; editName.isEdit = fals
         </div>
       </div>
       <el-alert class="setting-tips" title="Tips: 昵称在服务器内可单独设置（服务器昵称）" type="info" :closable="false" />
+      <el-button type="danger" class="logout-btn" @click="logout">退出登录</el-button>
     </div>
   </ElDialog>
 </template>
