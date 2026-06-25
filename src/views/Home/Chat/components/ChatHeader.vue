@@ -20,6 +20,7 @@ const ch = computed(() => {
       <span v-if="ch?.topic" class="channel-topic">{{ ch.topic }}</span>
     </div>
     <div class="header-actions">
+      <router-link v-if="globalStore.currentServerId" :to="`/servers/${globalStore.currentServerId}/search`" class="search-link">🔍 搜索</router-link>
       <el-button size="small" text @click="$emit('toggleThread')">🧵 话题</el-button>
       <el-button size="small" text @click="$emit('toggleMembers')">👥 成员</el-button>
     </div>

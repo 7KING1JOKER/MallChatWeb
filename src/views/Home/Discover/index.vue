@@ -4,12 +4,20 @@ import apis from '@/services/apis'
 import type { ServerVO } from '@/services/types'
 import { useRouter } from 'vue-router'
 import { useGlobalStore } from '@/stores/global'
+import { useServerStore } from '@/stores/server'
 const router = useRouter()
 const globalStore = useGlobalStore()
+const serverStore = useServerStore()
 const servers = ref<ServerVO[]>([])
 const loading = ref(false)
 onMounted(async () => { loading.value = true; const data = await apis.discoverServers().send(); if (data) servers.value = data.list; loading.value = false })
-async function join(sid: number) { await globalStore.enterServer(sid); router.push(`/servers/${sid}/channels/`) }
+async function join(sid: number) {
+  try { await apis.joinServer(sid).send() } catch { /* 可能已经加入 */ }
+  await serverStore.getMyServers()
+  await globalStore.enterServer(sid)
+  await serverStore.getServerDetail(sid)
+  router.push(`/servers/${sid}/channels/`)
+}
 </script>
 <template>
   <div class="discover-page">

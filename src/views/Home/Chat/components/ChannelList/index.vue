@@ -55,7 +55,7 @@ async function createChannel() {
     <div class="channel-tree">
       <template v-for="cat in categories" :key="cat.id">
         <CategoryHeader :category="cat" />
-        <ChannelItem v-for="ch in cat.channels" :key="ch.id" :channel="ch" :is-active="activeChannelId === ch.id" @click="onChannelClick" />
+        <ChannelItem v-for="ch in cat.channels" :key="ch.id" :channel="ch" :is-active="activeChannelId === ch.id" :unread-count="globalStore.unreadCounts.get(ch.id) || 0" @click="onChannelClick" />
       </template>
       <div v-if="!categories.length" class="empty-hint">暂无频道</div>
     </div>

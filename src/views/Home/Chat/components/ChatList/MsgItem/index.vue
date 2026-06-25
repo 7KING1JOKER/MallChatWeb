@@ -7,6 +7,7 @@ import { useChatStore } from '@/stores/chat'
 import { useGlobalStore } from '@/stores/global'
 import { formatTimestamp } from '@/utils/computedTime'
 import renderReplyContent from '@/utils/renderReplyContent'
+import apis from '@/services/apis'
 import ContextMenu from '../ContextMenu/index.vue'
 import RenderMessage from '@/components/RenderMessage/index.vue'
 
@@ -20,6 +21,11 @@ const isEdited = computed(() => props.message.status === 2)
 const time = computed(() => props.message.createTime ? formatTimestamp(new Date(props.message.createTime).getTime()) : '')
 const replyMsg = computed(() => props.message.replyMsgId && globalStore.currentChannelId ? chatStore.getMessages(globalStore.currentChannelId).find(m => m.id === props.message.replyMsgId) : null)
 const replyContent = computed(() => replyMsg.value ? renderReplyContent(replyMsg.value.fromUser.nickname, replyMsg.value.msgType, replyMsg.value.content) : null)
+
+async function toggleReaction(emoji: string) {
+  try { await apis.addReaction(props.message.id, emoji).send() }
+  catch { await apis.removeReaction(props.message.id, emoji).send() }
+}
 </script>
 <template>
   <div :class="['msg-item', { 'is-me': isMe }]">
@@ -35,7 +41,7 @@ const replyContent = computed(() => replyMsg.value ? renderReplyContent(replyMsg
         <div v-if="replyContent" class="reply-ref">{{ replyContent }}</div>
         <RenderMessage :message="message" />
         <div v-if="message.reactions?.length" class="reaction-row">
-          <span v-for="r in message.reactions" :key="r.emoji" :class="['reaction-chip', { reacted: r.reacted }]" @click="() => {}">{{ r.emoji }} {{ r.count }}</span>
+          <span v-for="r in message.reactions" :key="r.emoji" :class="['reaction-chip', { reacted: r.reacted }]" @click="toggleReaction(r.emoji)">{{ r.emoji }} {{ r.count }}</span>
         </div>
         <div v-if="message.thread" class="thread-entry" @click="globalStore.enterThread(message.thread.id)">🧵 {{ message.thread.name || '话题' }} · {{ message.thread.messageCount }} 条回复</div>
       </div>
