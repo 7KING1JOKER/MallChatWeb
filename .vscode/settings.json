@@ -1,4 +1,7 @@
 {
   "typescript.tsdk": "node_modules/typescript/lib",
-  "cSpell.words": ["mallchat", "vueuse", "wechat", "weixin"]
+  "cSpell.words": ["mallchat", "vueuse", "wechat", "weixin"],
+  "vetur.validation.script": false,
+  "vetur.validation.template": false,
+  "vetur.experimental.templateInterpolationService": false
 }
