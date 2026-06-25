@@ -465,74 +465,15 @@ export type RefreshTokenResp = {
   token: string
 }
 
-// ==================== 临时兼容类型（待 B/C 重构完成后删除） ====================
+// ==================== 旧类型别名（RenderMessage 子组件使用） ====================
 
-/** @deprecated 旧版消息体类型，Person B/C 重构后删除 */
+/** @deprecated 旧版消息体类型 */
 export type MsgType = any
-/** @deprecated 旧版消息类型，Person B/C 重构后删除 */
-export type MessageType = any
-/** @deprecated 旧版文本消息体，Person C 重构 RenderMessage 后删除 */
+/** @deprecated RenderMessage/text.vue 使用 */
 export type TextBody = any
-/** @deprecated 旧版图片消息体，Person C 重构 RenderMessage 后删除 */
+/** @deprecated RenderMessage/image.vue 使用 */
 export type ImageBody = any
-/** @deprecated 旧版语音消息体，Person C 重构 RenderMessage 后删除 */
+/** @deprecated RenderMessage/voice.vue 使用 */
 export type VoiceBody = any
-/** @deprecated 旧版视频消息体，Person C 重构 RenderMessage 后删除 */
-export type VideoBody = any
-/** @deprecated 旧版文件消息体，Person C 重构 RenderMessage 后删除 */
+/** @deprecated RenderMessage/file.vue 使用 */
 export type FileBody = any
-/** @deprecated 旧版表情消息体，Person C 重构 RenderMessage 后删除 */
-export type EmojiBody = any
-/** @deprecated 旧版消息标记，Person B 重构 chatStore 后删除 */
-export type MarkItemType = any
-/** @deprecated 旧版撤回消息类型，Person B 重构 chatStore 后删除 */
-export type RevokedMsgType = any
-/** @deprecated 旧版会话列表项，Person B 重构 store 后删除 */
-export type SessionItem = any
-/** @deprecated 旧版联系人，Person B 重构 store 后删除 */
-export type ContactItem = any
-/** @deprecated 旧版好友请求，Person B 重构 store 后删除 */
-export type RequestFriendItem = any
-/** @deprecated 旧版好友请求状态，Person B 重构 contacts store 后删除 */
-export enum RequestFriendAgreeStatus {
-  Waiting = 1,
-  Agree,
-}
-/** @deprecated 旧版用户信息类型，Person B 重构 userStore 后删除 */
-export type UserInfoType = any
-/** @deprecated 旧版徽章类型，Person C 重构 UserSettingBox 后删除 */
-export type BadgeType = any
-/** @deprecated 旧版群详情，Person B 重构 serverStore 后删除 */
-export type GroupDetailReq = any
-/** @deprecated 旧版群统计，Person B 重构 serverStore 后删除 */
-export type GroupStatisticType = any
-/** @deprecated 旧版用户列表项，Person B/C 重构后删除 */
-export type UserItem = any
-/** @deprecated 旧版缓存用户，Person B 重构 cachedStore 后删除 */
-export type CacheUserItem = any
-/** @deprecated 旧版缓存用户请求，Person B 重构 cachedStore 后删除 */
-export type CacheUserReq = any
-/** @deprecated 旧版徽章缓存请求，Person B 重构 cachedStore 后删除 */
-export type CacheBadgeReq = any
-/** @deprecated 旧版徽章缓存项，Person B 重构 cachedStore 后删除 */
-export type CacheBadgeItem = any
-/** @deprecated 旧版消息回复类型，Person C 重构后删除 */
-export type MessageReplyType = any
-/** @deprecated 旧版消息标记请求，Person B 重构 useLikeToggle 后删除 */
-export type MarkMsgReq = any
-/** @deprecated 旧版消息请求，Person B 重构 chatStore 后删除 */
-export type MessageReq = any
-/** @deprecated 旧版标记项，Person B 重构 chatStore 后删除 */
-export type MarkItemType_v2 = any
-/** @deprecated 旧版已读未读，Person B 重构 chatStore 后删除 */
-export type MsgReadUnReadCountType = any
-/** @deprecated 旧版表情项，Person B 重构 emojiStore 后删除 */
-export type EmojiItem = any
-/** @deprecated 旧版全体用户会话标记，Person B 重构 chatStore 后删除 */
-export enum IsAllUserEnum { Not, Yes }
-/** @deprecated 旧版消息互动，Person B 重构 chatStore 后删除 */
-export type MessageMarkType = any
-/** @deprecated 旧版回复类型，Person C 重构 RenderMessage 后删除 */
-export type ReplyType = any
-/** @deprecated 旧版消息发送者类型，Person C 重构 MsgItem 后删除 */
-export type MsgUserType = any

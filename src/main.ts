@@ -3,7 +3,6 @@ import { createPinia } from 'pinia'
 import dayjs from 'dayjs'
 import weekday from 'dayjs/plugin/weekday'
 import vLogin from './directives/v-login'
-import vFriends from './directives/v-friends'
 import vLoginShow from './directives/v-login-show'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import router from './router'
@@ -26,6 +25,6 @@ app
   .use(router)
   .directive('login', vLogin) // 登录权限指令-未登录先登录
   .directive('login-show', vLoginShow) // 登录权限指令-未登录先登录
-  .directive('friends', vFriends) // 是否好友
+  // .directive('friends', ...) — 好友系统已移除
   .mount('#app')
 // router.isReady().then(() => app.mount('#app'))

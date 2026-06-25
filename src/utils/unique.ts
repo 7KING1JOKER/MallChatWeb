@@ -1,5 +1,5 @@
-import type { UserItem } from '@/services/types'
-
-export const uniqueUserList = (arr: UserItem[]) => {
-  return Object.values(Object.fromEntries(arr.map((item) => [item.uid, item])))
+/** 按 id 去重数组 */
+export const uniqueUserList = <T extends { id: number }>(arr: T[]): T[] => {
+  const seen = new Set<number>()
+  return arr.filter((item) => { const isNew = !seen.has(item.id); seen.add(item.id); return isNew })
 }

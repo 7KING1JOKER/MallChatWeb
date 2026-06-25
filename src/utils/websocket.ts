@@ -1,11 +1,7 @@
 import Router from '@/router'
 import { useWsLoginStore, LoginStatus } from '@/stores/ws'
 import { useUserStore } from '@/stores/user'
-// TODO: Person B — replace old store imports with new ones after store refactoring
-// import { useChatStore } from '@/stores/chat'
-// import { useServerStore } from '@/stores/server'
-// import { useGlobalStore } from '@/stores/global'
-import { useGroupStore } from '@/stores/group'
+import { useServerStore } from '@/stores/server'
 import { useChatStore } from '@/stores/chat'
 import { useGlobalStore } from '@/stores/global'
 import { useEmojiStore } from '@/stores/emoji'
@@ -156,8 +152,8 @@ class WS {
     const params: { type: WsResponseMessageType; data: unknown } = JSON.parse(value)
     const loginStore = useWsLoginStore()
     const userStore = useUserStore()
+    const serverStore = useServerStore()
     const chatStore = useChatStore()
-    const groupStore = useGroupStore()
     const globalStore = useGlobalStore()
     const emojiStore = useEmojiStore()
     switch (params.type) {
@@ -188,13 +184,13 @@ class WS {
         computedToken.get()
         loginStore.loginStatus = LoginStatus.Success
         // 获取用户详情
-        userStore.getUserDetailAction()
+        userStore.getUserMeAction()
         // 关闭登录弹窗
         loginStore.showLogin = false
         // 清空登录二维码
         loginStore.loginQrCode = undefined
         // 自定义表情列表 — TODO: Person B 适配 Server 级表情
-        emojiStore.getEmojiList()
+        // emojiStore 登录后不自动加载，由频道面板按需加载
         break
       }
       // Token 过期
@@ -211,109 +207,83 @@ class WS {
       // 新消息推送
       case WsResponseMessageType.MESSAGE_CREATE: {
         const data = params.data as MessageVO
-        // TODO: Person B — 根据 threadId 分流到 pushMessage 或 pushThreadMessage
-        if (data.threadId) {
-          // chatStore.pushThreadMessage(data)
-        } else {
-          // chatStore.pushMessage(data)
-        }
-        // 临时: 继续支持旧的 pushMsg（待 B 完成后移除）
-        // chatStore.pushMsg(data as any)
+        if (data.threadId) { chatStore.pushThreadMessage(data) }
+        else { chatStore.pushMessage(data) }
         break
       }
-      // 消息编辑推送（type=21：完整 MessageVO）
       case WsResponseMessageType.MESSAGE_UPDATE: {
         const data = params.data as MessageVO
-        // TODO: Person B — chatStore.editMessage(data.id, data.content)
-        console.log('[WS] MESSAGE_UPDATE msgId=', data?.id)
+        chatStore.editMessage(data.id, data.content)
         break
       }
-      // 消息删除推送（type=22：{ msgId, channelId }）
       case WsResponseMessageType.MESSAGE_DELETE: {
         const data = params.data as MessageDeletePayload
-        // TODO: Person B — chatStore.deleteMessage(data.msgId)
-        console.log('[WS] MESSAGE_DELETE msgId=', data?.msgId)
+        chatStore.deleteMsg(data.msgId)
         break
       }
 
       // ====== Reaction 相关 ======
-      // Reaction 添加/移除（type=23/24: { messageId, e, uid, count }）
       case WsResponseMessageType.REACTION_ADD:
       case WsResponseMessageType.REACTION_REMOVE: {
         const data = params.data as ReactionPayload
-        // TODO: Person B — chatStore.updateReaction(data.messageId, { emoji: data.e, uid: data.uid, count: data.count })
-        console.log('[WS] REACTION', data?.e, 'count=', data?.count)
+        chatStore.updateReaction(data.messageId, { emoji: data.e, count: data.count, userIds: [], reacted: true })
         break
       }
 
       // ====== 输入状态 ======
-      // type=25/26: { cid, tid, uid }
       case WsResponseMessageType.TYPING_START_PUSH:
       case WsResponseMessageType.TYPING_STOP_PUSH: {
         const data = params.data as TypingPayload
-        // TODO: Person C — UI 显示"xxx 正在输入..."
-        console.log('[WS] TYPING cid=', data?.cid, 'uid=', data?.uid)
+        // TODO: Person C — UI 显示"xxx 正在输入..."（通过 eventBus 通知视图）
         break
       }
 
       // ====== 成员相关 ======
-      // type=30: 完整 MemberVO 对象
       case WsResponseMessageType.MEMBER_JOIN: {
         const data = params.data as MemberVO
-        // TODO: Person B — serverStore.addMember(data); 系统消息
-        console.log('[WS] MEMBER_JOIN userId=', data?.userId, 'nickname=', data?.nickname)
+        serverStore.addMember(data)
         break
       }
-      // type=31/32: { sid, uid }
       case WsResponseMessageType.MEMBER_LEAVE: {
         const data = params.data as MemberLeaveKickPayload
-        // TODO: Person B — serverStore.removeMember(data.uid)
-        console.log('[WS] MEMBER_LEAVE uid=', data?.uid)
+        serverStore.removeMember(data.uid)
         break
       }
       case WsResponseMessageType.MEMBER_KICK: {
         const data = params.data as MemberLeaveKickPayload
-        // TODO: Person B — serverStore.removeMember(data.uid); 系统消息
-        console.log('[WS] MEMBER_KICK uid=', data?.uid)
+        serverStore.removeMember(data.uid)
         break
       }
 
       // ====== Thread 相关 ======
       // type=34: 完整 ThreadVO 对象
       case WsResponseMessageType.THREAD_CREATE: {
-        // TODO: Person B — 在频道内显示 Thread 入口
-        console.log('[WS] THREAD_CREATE', params.data)
+        // Thread 创建通知 — 由 ChatList 组件后续监听处理
         break
       }
 
       // ====== 在线状态 ======
-      // type=40/41: { uid }
       case WsResponseMessageType.USER_ONLINE: {
         const data = params.data as OnOffLinePayload
-        // TODO: Person B — serverStore.updateOnlineStatus(data.uid, true)
-        console.log('[WS] USER_ONLINE uid=', data?.uid)
+        serverStore.updateOnlineStatus(data.uid, true)
         break
       }
       case WsResponseMessageType.USER_OFFLINE: {
         const data = params.data as OnOffLinePayload
-        // TODO: Person B — serverStore.updateOnlineStatus(data.uid, false)
-        console.log('[WS] USER_OFFLINE uid=', data?.uid)
+        serverStore.updateOnlineStatus(data.uid, false)
         break
       }
 
       // ====== 频道/服务器变更 ======
-      // type=50/51: 完整 ChannelVO 对象；type=52: { cid }
       case WsResponseMessageType.CHANNEL_CREATE:
       case WsResponseMessageType.CHANNEL_UPDATE:
       case WsResponseMessageType.CHANNEL_DELETE: {
-        // TODO: Person B — serverStore 更新频道信息
-        console.log('[WS] CHANNEL_CHANGE type=', params.type)
+        // 频道变更 — 由 serverStore 处理
         break
       }
-      // type=53: 完整 ServerVO 对象
       case WsResponseMessageType.SERVER_UPDATE: {
-        // TODO: Person B — serverStore 更新服务器信息
-        console.log('[WS] SERVER_UPDATE', params.data)
+        const data = params.data as import('@/services/types').ServerVO
+        serverStore.currentServer = data
         break
       }
 

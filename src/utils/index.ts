@@ -109,10 +109,8 @@ export const generateBody = (fileInfo: any, msgType: MsgEnum, isMock?: boolean) 
 
   if (msgType === MsgEnum.IMAGE) {
     body = { ...baseBody, width, height }
-  } else if (msgType === MsgEnum.VOICE) {
+  } else if (msgType === MsgEnum.SOUND) {
     body = { ...baseBody, second }
-  } else if (msgType === MsgEnum.VIDEO) {
-    body = { ...baseBody, thumbWidth, thumbHeight, thumbUrl, thumbSize }
   } else if (msgType === MsgEnum.FILE) {
     body = { ...baseBody, fileName: name, url: downloadUrl }
   }

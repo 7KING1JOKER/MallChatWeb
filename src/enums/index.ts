@@ -63,38 +63,3 @@ export enum IsYetEnum {
   YES,
 }
 
-// ==================== 已废弃（临时兼容，待 B/C 重构后删除） ====================
-
-/** @deprecated 被 PermissionBit RBAC 替代 */
-export enum MarkEnum {
-  LIKE = 1,
-  DISLIKE,
-}
-
-/** @deprecated 被 Server/Channel 结构替代 */
-export enum RoomTypeEnum {
-  /** 1群聊 */
-  Group = 1,
-  /** 2单聊 */
-  Single,
-}
-
-/** @deprecated 被 WS type=30/31 替代 */
-export enum ChangeTypeEnum {
-  /** 1 加入群组 */
-  JOIN = 1,
-  /** 2 移除群组 */
-  REMOVE,
-}
-
-/** @deprecated 被 PermissionBit RBAC 替代 */
-export enum RoleEnum {
-  /** 1群主 */
-  LORD = 1,
-  /** 2管理员 */
-  ADMIN,
-  /** 3普通成员 */
-  NORMAL,
-  /** 4踢出群聊 */
-  REMOVED,
-}
