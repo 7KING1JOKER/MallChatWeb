@@ -55,6 +55,12 @@
   color: var(--font-main);
   background-color: var(--background-wrapper);
   border-radius: 16px;
+
+  .content-area {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+  }
 }
 
 .footer {

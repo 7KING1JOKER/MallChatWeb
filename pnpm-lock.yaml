@@ -4,9 +4,6 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-overrides:
-  bin-wrapper: npm:bin-wrapper-china
-
 importers:
 
   .:
@@ -25,7 +22,7 @@ importers:
         version: 2.21.5
       dayjs:
         specifier: ^1.11.10
-        version: 1.11.19
+        version: 1.11.21
       element-plus:
         specifier: ^2.3.14
         version: 2.13.5(typescript@5.1.6)(vue@3.5.30(typescript@5.1.6))
@@ -252,12 +249,16 @@ packages:
     resolution: {integrity: sha512-Tub4ZKEXqbPjXgWLl2+3JpQAYBJ8+ikpQ2Ocj/q/r0LwE3UhENh7EUabyHjz2kCEsrRY83ew2DQdHluuiDQFzg==}
     engines: {node: '>=6.9.0'}
 
-  '@babel/helper-string-parser@7.27.1':
-    resolution: {integrity: sha512-qMlSxKbpRlAridDExk92nSobyDdpPijUq2DW6oDnUqd0iOGxmQjyqhMIihI9+zv4LPyZdRje2cavWPbCbWm3eA==}
+  '@babel/helper-string-parser@7.29.7':
+    resolution: {integrity: sha512-Pb5ijPrZ89GDH8223L4UP8i6QApWxs04RbPQJTeWDV0/keR2E36MeKnyr6LYmUUvqRRI+Iv87SuF1W6ErINzYw==}
     engines: {node: '>=6.9.0'}
 
   '@babel/helper-validator-identifier@7.28.5':
     resolution: {integrity: sha512-qSs4ifwzKJSV39ucNjsvc6WVHs6b7S03sOh2OcHF9UHfVPqWWALUsNUVzhSBiItjRZoLHx7nIarVjqKVusUZ1Q==}
+    engines: {node: '>=6.9.0'}
+
+  '@babel/helper-validator-identifier@7.29.7':
+    resolution: {integrity: sha512-qehxGkRj55h/ff8EMaJ+cYhyaKlHIxqYDn682wQD7RNp9UujOQsHog2uS0r2vzr4pW+sXf90NeeayjcNaX3fFg==}
     engines: {node: '>=6.9.0'}
 
   '@babel/helper-validator-option@7.27.1':
@@ -1169,17 +1170,13 @@ packages:
     resolution: {integrity: sha512-Mkfm4iE1VFt4xd4vH+gx+0/71esbfus2LsnCGe8Pi4mndSPyT+NGES/Eg99jx8/lUGWfu3z2yuB/bt5UB+iVbQ==}
     engines: {node: '>=6'}
 
-  bin-wrapper-china@0.1.0:
-    resolution: {integrity: sha512-1UCm17WYEbgry50tup+AQN+JGVEVzoW4f8HMl899k1lvuFxWKGZXl/G2fgxQxAckRjnloO3ijLVVEsv8zescUg==}
-    engines: {node: '>=8.3'}
-    hasBin: true
+  bin-wrapper@4.1.0:
+    resolution: {integrity: sha512-hfRmo7hWIXPkbpi0ZltboCMVrU+0ClXR/JgbCKKjlDjQf6igXa7OwdqNcFWQZPZTgiY7ZpzE3+LjjkLiTN2T7Q==}
+    engines: {node: '>=6'}
 
   binary-extensions@2.3.0:
     resolution: {integrity: sha512-Ceh+7ox5qe7LJuLHoY0feh3pHuUDHAcRUeyL2VYghZwfpkNIy/+8Ocg0a3UuSoYzavmylwuLWQOf3hl0jjMMIw==}
     engines: {node: '>=8'}
-
-  binary-mirror-config@1.41.0:
-    resolution: {integrity: sha512-ZiIhR1s6Sv1Fv6qCQqfPjx0Cj86BgFlhqNxZgHkQOWcxJcMbO3mj1iqsuVjowYqJqeZL8e52+IEv7IRnSX6T6w==}
 
   bl@1.2.3:
     resolution: {integrity: sha512-pvcNpa0UU69UT341rO6AYy4FVAIkUHuZXRIWbq+zHnsVcRzDDjIAhGuuYoi0d//cwIwtt4pkpKycWEfjdV+vww==}
@@ -1479,8 +1476,8 @@ packages:
     resolution: {integrity: sha512-BS8PfmtDGnrgYdOonGZQdLZslWIeCGFP9tpan0hi1Co2Zr2NKADsvGYA8XxuG/4UWgJ6Cjtv+YJnB6MM69QGlQ==}
     engines: {node: '>= 0.4'}
 
-  dayjs@1.11.19:
-    resolution: {integrity: sha512-t5EcLVS6QPBNqM2z8fakk/NKel+Xzshgt8FFKAn+qwlD1pzZWxh0nVCrvFK7ZDb6XucZeF9z8C7CBWTRIVApAw==}
+  dayjs@1.11.21:
+    resolution: {integrity: sha512-98IT+HOahAisibz/yjKbzuOBwYcjJ7BCLPzARyHiyEBmRz4fatF+KPJszEHXsGYjUG234aH/cOjW1wwTbKUZlA==}
 
   de-indent@1.0.2:
     resolution: {integrity: sha512-e/1zu3xH5MQryN2zdVaF0OrdNLUbvWxzMbi+iNA6Bky7l1RoP8a2fIbRocyHclXt/arDrrR6lL3TqFD9pMQTsg==}
@@ -2391,6 +2388,10 @@ packages:
     resolution: {integrity: sha512-TR3KfrTZTYLPB6jUjfx6MF9WcWrHL9su5TObK4ZkYgBdWKPOFoSoQIdEuTuR82pmtxH2spWG9h6etwfr1pLBqQ==}
     engines: {node: '>=6'}
 
+  import-lazy@3.1.0:
+    resolution: {integrity: sha512-8/gvXvX2JMn0F+CDlSC4l6kOmVaLOO3XLkksI7CI3Ud95KDYJuYur2b9P/PUt/i/pDAMd/DulQsNbbbmRRsDIQ==}
+    engines: {node: '>=6'}
+
   import-lazy@4.0.0:
     resolution: {integrity: sha512-rKtvo6a868b5Hu3heneU+L4yEQ4jYKLtjpnPeUdK7h0yzXGmyBTypknlkCvHFBqfX9YlorEiMM6Dnq/5atfHkw==}
     engines: {node: '>=8'}
@@ -2990,8 +2991,8 @@ packages:
   muggle-string@0.3.1:
     resolution: {integrity: sha512-ckmWDJjphvd/FvZawgygcUeQCxzvohjFO5RxTjj4eq8kw359gFF3E1brjfI+viLMxss5JrHTDRHZvu2/tuy0Qg==}
 
-  nanoid@3.3.11:
-    resolution: {integrity: sha512-N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w==}
+  nanoid@3.3.15:
+    resolution: {integrity: sha512-y7Wygv/7mEOvxTuEQDB8StXdMRBWf1kR/tlhAzBRUFkB2jfcLOAxO/SHmOO2zgz1pVgK29/kyupn059/bCHdjA==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
@@ -4509,9 +4510,11 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@babel/helper-string-parser@7.27.1': {}
+  '@babel/helper-string-parser@7.29.7': {}
 
   '@babel/helper-validator-identifier@7.28.5': {}
+
+  '@babel/helper-validator-identifier@7.29.7': {}
 
   '@babel/helper-validator-option@7.27.1': {}
 
@@ -4565,8 +4568,8 @@ snapshots:
 
   '@babel/types@7.29.0':
     dependencies:
-      '@babel/helper-string-parser': 7.27.1
-      '@babel/helper-validator-identifier': 7.28.5
+      '@babel/helper-string-parser': 7.29.7
+      '@babel/helper-validator-identifier': 7.29.7
 
   '@commitlint/cli@17.8.1':
     dependencies:
@@ -4630,7 +4633,7 @@ snapshots:
       '@types/node': 20.5.1
       chalk: 4.1.2
       cosmiconfig: 8.3.6(typescript@5.9.3)
-      cosmiconfig-typescript-loader: 4.4.0(@types/node@20.5.1)(cosmiconfig@8.3.6(typescript@5.1.6))(ts-node@10.9.2(@types/node@18.19.130)(typescript@5.1.6))(typescript@5.9.3)
+      cosmiconfig-typescript-loader: 4.4.0(@types/node@20.5.1)(cosmiconfig@8.3.6(typescript@5.9.3))(ts-node@10.9.2(@types/node@20.5.1)(typescript@5.9.3))(typescript@5.9.3)
       lodash.isplainobject: 4.0.6
       lodash.merge: 4.6.2
       lodash.uniq: 4.5.0
@@ -5472,19 +5475,16 @@ snapshots:
       execa: 1.0.0
       find-versions: 3.2.0
 
-  bin-wrapper-china@0.1.0:
+  bin-wrapper@4.1.0:
     dependencies:
       bin-check: 4.1.0
       bin-version-check: 4.0.0
-      binary-mirror-config: 1.41.0
       download: 7.1.0
-      import-lazy: 4.0.0
+      import-lazy: 3.1.0
       os-filter-obj: 2.0.0
       pify: 4.0.1
 
   binary-extensions@2.3.0: {}
-
-  binary-mirror-config@1.41.0: {}
 
   bl@1.2.3:
     dependencies:
@@ -5717,7 +5717,7 @@ snapshots:
 
   core-util-is@1.0.3: {}
 
-  cosmiconfig-typescript-loader@4.4.0(@types/node@20.5.1)(cosmiconfig@8.3.6(typescript@5.1.6))(ts-node@10.9.2(@types/node@18.19.130)(typescript@5.1.6))(typescript@5.9.3):
+  cosmiconfig-typescript-loader@4.4.0(@types/node@20.5.1)(cosmiconfig@8.3.6(typescript@5.9.3))(ts-node@10.9.2(@types/node@20.5.1)(typescript@5.9.3))(typescript@5.9.3):
     dependencies:
       '@types/node': 20.5.1
       cosmiconfig: 8.3.6(typescript@5.9.3)
@@ -5801,7 +5801,7 @@ snapshots:
   cwebp-bin@6.1.2:
     dependencies:
       bin-build: 3.0.0
-      bin-wrapper: bin-wrapper-china@0.1.0
+      bin-wrapper: 4.1.0
 
   d@1.0.2:
     dependencies:
@@ -5832,7 +5832,7 @@ snapshots:
       es-errors: 1.3.0
       is-data-view: 1.0.2
 
-  dayjs@1.11.19: {}
+  dayjs@1.11.21: {}
 
   de-indent@1.0.2: {}
 
@@ -6022,7 +6022,7 @@ snapshots:
       '@types/lodash-es': 4.17.12
       '@vueuse/core': 12.0.0(typescript@5.1.6)
       async-validator: 4.2.5
-      dayjs: 1.11.19
+      dayjs: 1.11.21
       lodash: 4.17.23
       lodash-es: 4.17.23
       lodash-unified: 1.0.3(@types/lodash-es@4.17.12)(lodash-es@4.17.23)(lodash@4.17.23)
@@ -6688,7 +6688,7 @@ snapshots:
   gifsicle@5.2.0:
     dependencies:
       bin-build: 3.0.0
-      bin-wrapper: bin-wrapper-china@0.1.0
+      bin-wrapper: 4.1.0
       execa: 5.1.1
       logalot: 2.1.0
 
@@ -6806,7 +6806,7 @@ snapshots:
       into-stream: 3.1.0
       is-retry-allowed: 1.2.0
       isurl: 1.0.0
-      lowercase-keys: 1.0.1
+      lowercase-keys: 1.0.0
       mimic-response: 1.0.1
       p-cancelable: 0.4.1
       p-timeout: 2.0.1
@@ -6946,6 +6946,8 @@ snapshots:
     dependencies:
       parent-module: 1.0.1
       resolve-from: 4.0.0
+
+  import-lazy@3.1.0: {}
 
   import-lazy@4.0.0: {}
 
@@ -7167,13 +7169,13 @@ snapshots:
   jpegtran-bin@5.0.2:
     dependencies:
       bin-build: 3.0.0
-      bin-wrapper: bin-wrapper-china@0.1.0
+      bin-wrapper: 4.1.0
       logalot: 2.1.0
 
   jpegtran-bin@6.0.1:
     dependencies:
       bin-build: 3.0.0
-      bin-wrapper: bin-wrapper-china@0.1.0
+      bin-wrapper: 4.1.0
 
   js-tokens@4.0.0: {}
 
@@ -7506,7 +7508,7 @@ snapshots:
   mozjpeg@7.1.1:
     dependencies:
       bin-build: 3.0.0
-      bin-wrapper: bin-wrapper-china@0.1.0
+      bin-wrapper: 4.1.0
 
   ms@2.1.2: {}
 
@@ -7514,7 +7516,7 @@ snapshots:
 
   muggle-string@0.3.1: {}
 
-  nanoid@3.3.11: {}
+  nanoid@3.3.15: {}
 
   natural-compare-lite@1.4.0: {}
 
@@ -7631,7 +7633,7 @@ snapshots:
   optipng-bin@7.0.1:
     dependencies:
       bin-build: 3.0.0
-      bin-wrapper: bin-wrapper-china@0.1.0
+      bin-wrapper: 4.1.0
 
   os-filter-obj@2.0.0:
     dependencies:
@@ -7813,7 +7815,7 @@ snapshots:
   pngquant-bin@6.0.1:
     dependencies:
       bin-build: 3.0.0
-      bin-wrapper: bin-wrapper-china@0.1.0
+      bin-wrapper: 4.1.0
       execa: 4.1.0
 
   possible-typed-array-names@1.1.0: {}
@@ -7850,7 +7852,7 @@ snapshots:
 
   postcss@8.5.8:
     dependencies:
-      nanoid: 3.3.11
+      nanoid: 3.3.15
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
@@ -8023,7 +8025,7 @@ snapshots:
 
   responselike@1.0.2:
     dependencies:
-      lowercase-keys: 1.0.1
+      lowercase-keys: 1.0.0
 
   restore-cursor@4.0.0:
     dependencies:
