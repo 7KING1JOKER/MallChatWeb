@@ -8,10 +8,6 @@ module.exports = {
     'stylelint-config-standard-scss',
     // 样式属性顺序规则
     'stylelint-config-recess-order',
-    // 样式属性 vue 规则
-    'stylelint-config-recommended-vue',
-    // 样式属性 vue 规则
-    'stylelint-config-recommended-vue/scss',
     // 接入 Prettier 规则
     'stylelint-prettier/recommended',
   ],

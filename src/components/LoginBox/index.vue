@@ -1,54 +1,73 @@
 <script setup lang="ts">
-import { computed, watchEffect } from 'vue'
-import { useWsLoginStore, LoginStatus } from '@/stores/ws'
-import QrCode from 'qrcode.vue'
+import { reactive, ref } from 'vue'
+import { ElMessage } from 'element-plus'
+import { useUserStore } from '@/stores/user'
+import { useWsLoginStore } from '@/stores/ws'
+import apis from '@/services/apis'
 
-const loginStore = useWsLoginStore()
-const visible = computed({
-  get() {
-    return loginStore.showLogin
-  },
-  set(value) {
-    loginStore.showLogin = value
-  },
-})
+const userStore = useUserStore()
+const wsLoginStore = useWsLoginStore()
 
-const loginQrCode = computed(() => loginStore.loginQrCode)
-const loginStatus = computed(() => loginStore.loginStatus)
+const visible = ref(false)
+const form = reactive({ username: '', password: '' })
+const loading = ref(false)
 
-watchEffect(() => {
-  // 打开窗口了 而且 二维码没获取，而且非登录就去获取二维码
-  if (visible.value && !loginQrCode.value) {
-    // 获取登录二维码
-    loginStore.getLoginQrCode()
+// 暴露给外部调用的 show 方法
+function show() { visible.value = true }
+defineExpose({ show })
+
+// 监听 v-login 指令触发的 showLogin
+import { watch } from 'vue'
+watch(() => wsLoginStore.showLogin, (v) => { if (v) visible.value = true })
+
+async function handleLogin() {
+  if (!form.username.trim() || !form.password.trim()) {
+    ElMessage.warning('请输入用户名和密码')
+    return
   }
-})
+  loading.value = true
+  try {
+    const data = await apis.login({ username: form.username, password: form.password }).send()
+    if (data) {
+      userStore.isSign = true
+      userStore.userInfo = { ...userStore.userInfo, ...data }
+      if (data.token) {
+        localStorage.setItem('TOKEN', data.token)
+      }
+      localStorage.setItem('USER_INFO', JSON.stringify(data))
+      ElMessage.success('登录成功')
+      visible.value = false
+      wsLoginStore.showLogin = false
+      form.username = ''
+      form.password = ''
+    }
+  } catch (e: any) {
+    ElMessage.error(e?.message || '登录失败，请检查后端是否启动')
+  } finally {
+    loading.value = false
+  }
+}
+
+function close() {
+  visible.value = false
+  wsLoginStore.showLogin = false
+}
 </script>
 
 <template>
-  <ElDialog class="login-box-modal" :width="376" v-model="visible" center>
+  <ElDialog class="login-box-modal" :width="400" v-model="visible" :close-on-click-modal="false" center @close="close">
     <div class="login-box">
       <img class="login-logo" src="@/assets/logo.jpeg" alt="MallChat" />
-      <p class="login-slogan">边聊边买，岂不快哉~</p>
-      <div class="login-qrcode-wrapper" v-loading="!loginQrCode">
-        <QrCode
-          class="login-qrcode"
-          v-if="loginQrCode"
-          :value="loginQrCode"
-          :size="328"
-          :margin="5"
-        />
-      </div>
-
-      <p class="login-desc" v-if="loginStatus === LoginStatus.Waiting">
-        <ElIcon :size="32" class="login-desc-icon" color="var(--color-wechat)"
-          ><IEpSuccessFilled
-        /></ElIcon>
-        扫码成功~，点击“登录”继续登录
-      </p>
-      <p class="login-desc" v-if="loginStatus === LoginStatus.Init">
-        使用「<strong class="login-desc-bold">微信</strong>」扫描二维码登录~~
-      </p>
+      <p class="login-slogan">账号密码登录</p>
+      <el-form label-position="top" @submit.prevent="handleLogin">
+        <el-form-item label="用户名">
+          <el-input v-model="form.username" placeholder="请输入用户名" />
+        </el-form-item>
+        <el-form-item label="密码">
+          <el-input v-model="form.password" type="password" show-password placeholder="请输入密码" @keydown.enter="handleLogin" />
+        </el-form-item>
+        <el-button type="primary" :loading="loading" class="login-btn" @click="handleLogin">登 录</el-button>
+      </el-form>
     </div>
   </ElDialog>
 </template>

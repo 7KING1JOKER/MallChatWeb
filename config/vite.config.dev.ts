@@ -15,9 +15,8 @@ export default mergeConfig(
       },
       https: isHttpsLifecycle, // 开启https
       proxy: {
-        // capi 开头的请求代理到远程服务器
-        '/capi': {
-          // 地址根据环境配置读取
+        // /api/v1 开头的请求代理到后端
+        '/api': {
           target: loadEnv('development', process.cwd()).VITE_API_PREFIX,
           changeOrigin: true,
         },
