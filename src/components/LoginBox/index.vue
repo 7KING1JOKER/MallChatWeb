@@ -13,12 +13,19 @@ const form = reactive({ username: '', password: '' })
 const loading = ref(false)
 
 // 暴露给外部调用的 show 方法
-function show() { visible.value = true }
+function show() {
+  visible.value = true
+}
 defineExpose({ show })
 
 // 监听 v-login 指令触发的 showLogin
 import { watch } from 'vue'
-watch(() => wsLoginStore.showLogin, (v) => { if (v) visible.value = true })
+watch(
+  () => wsLoginStore.showLogin,
+  (v) => {
+    if (v) visible.value = true
+  },
+)
 
 async function handleLogin() {
   if (!form.username.trim() || !form.password.trim()) {
@@ -55,7 +62,14 @@ function close() {
 </script>
 
 <template>
-  <ElDialog class="login-box-modal" :width="400" v-model="visible" :close-on-click-modal="false" center @close="close">
+  <ElDialog
+    class="login-box-modal"
+    :width="400"
+    v-model="visible"
+    :close-on-click-modal="false"
+    center
+    @close="close"
+  >
     <div class="login-box">
       <img class="login-logo" src="@/assets/logo.jpeg" alt="MallChat" />
       <p class="login-slogan">账号密码登录</p>
@@ -64,9 +78,17 @@ function close() {
           <el-input v-model="form.username" placeholder="请输入用户名" />
         </el-form-item>
         <el-form-item label="密码">
-          <el-input v-model="form.password" type="password" show-password placeholder="请输入密码" @keydown.enter="handleLogin" />
+          <el-input
+            v-model="form.password"
+            type="password"
+            show-password
+            placeholder="请输入密码"
+            @keydown.enter="handleLogin"
+          />
         </el-form-item>
-        <el-button type="primary" :loading="loading" class="login-btn" @click="handleLogin">登 录</el-button>
+        <el-button type="primary" :loading="loading" class="login-btn" @click="handleLogin"
+          >登 录</el-button
+        >
       </el-form>
     </div>
   </ElDialog>

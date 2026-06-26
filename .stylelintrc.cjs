@@ -11,6 +11,12 @@ module.exports = {
     // 接入 Prettier 规则
     'stylelint-prettier/recommended',
   ],
+  overrides: [
+    {
+      files: ['*.vue', '**/*.vue'],
+      customSyntax: 'postcss-html',
+    },
+  ],
   // 配置 rules
   rules: {
     // 开启 Prettier 自动格式化功能
@@ -25,6 +31,8 @@ module.exports = {
     'media-feature-range-notation': 'prefix',
     'color-function-notation': 'legacy',
     // 由于使用了Element UI组件库，修改组件样式时会出现`.tj-form-item__label``这种带有下划线的类名，stylelint就会报错。这里使用正则表达式允许选择器中出现短横线和下划线。
+    'declaration-block-single-line-max-declarations': null, // 允许单行多声明（如 utility class）
+    'no-descending-specificity': null, // scoped 组件中常见 .state-variant 放在 .child 前面的场景
     'selector-class-pattern': '^[a-z][a-zA-Z0-9_-]+$',
   },
   // 配置忽略文件

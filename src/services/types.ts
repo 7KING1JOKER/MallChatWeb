@@ -24,19 +24,19 @@ export type CursorPage<T> = {
  * 与后端 PermissionBit.java 严格对齐
  */
 export enum PermissionBit {
-  CREATE_INVITE = 0x0001,       // 1     — 创建邀请
-  KICK_MEMBERS = 0x0002,        // 2     — 踢出成员
-  BAN_MEMBERS = 0x0004,         // 4     — 封禁成员
-  ADMINISTRATOR = 0x0008,       // 8     — 管理员（全部权限）
-  MANAGE_CHANNELS = 0x0010,     // 16    — 管理频道
-  MANAGE_SERVER = 0x0020,       // 32    — 管理服务器
-  ADD_REACTIONS = 0x0040,       // 64    — 添加反应
-  SEND_MESSAGES = 0x0080,       // 128   — 发送消息
-  USE_THREADS = 0x0100,         // 256   — 使用话题
-  EMBED_LINKS = 0x0200,         // 512   — 嵌入链接
-  ATTACH_FILES = 0x0400,        // 1024  — 上传文件
-  MENTION_EVERYONE = 0x0800,    // 2048  — @全体成员
-  MANAGE_ROLES = 0x1000,        // 4096  — 管理角色
+  CREATE_INVITE = 0x0001, // 1     — 创建邀请
+  KICK_MEMBERS = 0x0002, // 2     — 踢出成员
+  BAN_MEMBERS = 0x0004, // 4     — 封禁成员
+  ADMINISTRATOR = 0x0008, // 8     — 管理员（全部权限）
+  MANAGE_CHANNELS = 0x0010, // 16    — 管理频道
+  MANAGE_SERVER = 0x0020, // 32    — 管理服务器
+  ADD_REACTIONS = 0x0040, // 64    — 添加反应
+  SEND_MESSAGES = 0x0080, // 128   — 发送消息
+  USE_THREADS = 0x0100, // 256   — 使用话题
+  EMBED_LINKS = 0x0200, // 512   — 嵌入链接
+  ATTACH_FILES = 0x0400, // 1024  — 上传文件
+  MENTION_EVERYONE = 0x0800, // 2048  — @全体成员
+  MANAGE_ROLES = 0x1000, // 4096  — 管理角色
 }
 
 /**
@@ -44,12 +44,12 @@ export enum PermissionBit {
  * 与后端 MessageTypeEnum.java 严格对齐
  */
 export enum MessageType {
-  TEXT = 1,     // 文本消息
-  IMAGE = 2,    // 图片消息
-  FILE = 3,     // 文件消息
-  SYSTEM = 4,   // 系统消息
-  SOUND = 5,    // 语音消息
-  EMOJI = 6,    // 表情消息
+  TEXT = 1, // 文本消息
+  IMAGE = 2, // 图片消息
+  FILE = 3, // 文件消息
+  SYSTEM = 4, // 系统消息
+  SOUND = 5, // 语音消息
+  EMOJI = 6, // 表情消息
 }
 
 /**
@@ -57,8 +57,8 @@ export enum MessageType {
  * 与后端 ChannelTypeEnum.java 严格对齐
  */
 export enum ChannelType {
-  TEXT = 0,     // 文字频道
-  VOICE = 1,    // 语音频道（预留）
+  TEXT = 0, // 文字频道
+  VOICE = 1, // 语音频道（预留）
 }
 
 // ==================== 用户 ====================
@@ -354,7 +354,7 @@ export type UnreadVO = {
 export type CreateChannelReq = {
   categoryId?: number
   name: string
-  type: number       // ChannelType.TEXT / ChannelType.VOICE
+  type: number // ChannelType.TEXT / ChannelType.VOICE
   topic?: string
 }
 

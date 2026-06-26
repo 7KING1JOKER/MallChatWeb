@@ -34,9 +34,23 @@ const badgeCount = computed(() => {
 </template>
 
 <style lang="scss" scoped>
-.server-icon-wrapper { padding: 6px 0; cursor: pointer; display: flex; justify-content: center; }
-.server-icon { transition: border-radius 0.2s; border: 2px solid transparent;
-  &:hover { border-radius: 30%; border-color: var(--el-color-primary); }
-  &.active { border-radius: 30%; border-color: var(--el-color-primary); }
+.server-icon-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 6px 0;
+  cursor: pointer;
+}
+
+.server-icon {
+  border: 2px solid transparent;
+  transition: border-radius 0.2s;
+  &:hover {
+    border-color: var(--el-color-primary);
+    border-radius: 30%;
+  }
+  &.active {
+    border-color: var(--el-color-primary);
+    border-radius: 30%;
+  }
 }
 </style>

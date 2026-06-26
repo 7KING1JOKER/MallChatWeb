@@ -3,8 +3,13 @@ import { ref, reactive } from 'vue'
 import apis from '@/services/apis'
 import { PermissionBit } from '@/services/types'
 import type {
-  ServerVO, ServerDetailVO, MemberVO, RoleVO,
-  CursorPage, CategoryVO, ChannelVO,
+  ServerVO,
+  ServerDetailVO,
+  MemberVO,
+  RoleVO,
+  CursorPage,
+  CategoryVO,
+  ChannelVO,
 } from '@/services/types'
 
 export const useServerStore = defineStore('server', () => {
@@ -19,30 +24,33 @@ export const useServerStore = defineStore('server', () => {
 
   // ===== Server 列表 =====
   async function getMyServers() {
-    const res = await apis.getMyServers()
+    const res = await apis.getMyServers().send()
     servers.value = res
   }
 
   async function getServerDetail(serverId: number) {
-    const res = await apis.getServerDetail(serverId)
+    const res = await apis.getServerDetail(serverId).send()
     currentDetail.value = res
     currentServer.value = res.server
   }
 
   async function createServer(data: { name: string; description?: string; icon?: string }) {
-    const res = await apis.createServer(data)
+    const res = await apis.createServer(data).send()
     servers.value.push(res)
     return res
   }
 
-  async function updateServer(serverId: number, data: { name?: string; description?: string; icon?: string }) {
-    const res = await apis.updateServer(serverId, data)
+  async function updateServer(
+    serverId: number,
+    data: { name?: string; description?: string; icon?: string },
+  ) {
+    const res = await apis.updateServer(serverId, data).send()
     currentServer.value = res
     return res
   }
 
   async function deleteServer(serverId: number) {
-    await apis.deleteServer(serverId)
+    await apis.deleteServer(serverId).send()
     servers.value = servers.value.filter((s) => s.id !== serverId)
   }
 
@@ -54,10 +62,12 @@ export const useServerStore = defineStore('server', () => {
       memberCursor.isLast = false
     }
     if (memberCursor.isLast) return
-    const res: CursorPage<MemberVO> = await apis.getMembers(serverId, {
-      cursor: memberCursor.cursor || undefined,
-      pageSize: 50,
-    })
+    const res: CursorPage<MemberVO> = await apis
+      .getMembers(serverId, {
+        cursor: memberCursor.cursor || undefined,
+        pageSize: 50,
+      })
+      .send()
     if (reset) {
       members.value = res.list
     } else {
@@ -84,7 +94,7 @@ export const useServerStore = defineStore('server', () => {
 
   // ===== 角色 =====
   async function getRoles(serverId: number) {
-    roles.value = await apis.getRoles(serverId)
+    roles.value = await apis.getRoles(serverId).send()
   }
 
   // ===== 在线状态 =====
@@ -137,12 +147,28 @@ export const useServerStore = defineStore('server', () => {
   }
 
   return {
-    servers, currentServer, currentDetail, members, memberCursor, roles, onlineUsers,
-    getMyServers, getServerDetail, createServer, updateServer, deleteServer,
-    getMembers, addMember, removeMember, updateMemberRole,
+    servers,
+    currentServer,
+    currentDetail,
+    members,
+    memberCursor,
+    roles,
+    onlineUsers,
+    getMyServers,
+    getServerDetail,
+    createServer,
+    updateServer,
+    deleteServer,
+    getMembers,
+    addMember,
+    removeMember,
+    updateMemberRole,
     getRoles,
-    updateOnlineStatus, isOnline,
+    updateOnlineStatus,
+    isOnline,
     hasPermission,
-    updateChannel, removeChannelFromTree, addChannelToTree,
+    updateChannel,
+    removeChannelFromTree,
+    addChannelToTree,
   }
 })

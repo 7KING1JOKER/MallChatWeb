@@ -54,8 +54,7 @@ export default {
   updateUserMe: (data: { nickname?: string; avatar?: string; email?: string }) =>
     putRequest<UserVO>(urls.updateUserMe, data),
   /** 绑定微信 */
-  bindWeChat: (data: AccountBindReq) =>
-    postRequest<UserVO>(urls.bindWeChat, data),
+  bindWeChat: (data: AccountBindReq) => postRequest<UserVO>(urls.bindWeChat, data),
   /** 获取指定用户信息 */
   getUserById: (id: number) => getRequest<UserVO>(urls.getUserById(id)),
 
@@ -69,16 +68,14 @@ export default {
   discoverServers: (params?: { cursor?: string; pageSize?: number }) =>
     getRequest<CursorPage<ServerVO>>(urls.discoverServers, { params }),
   /** 服务器详情（含 categories + channels 嵌套 + myRoles） */
-  getServerDetail: (serverId: number) =>
-    getRequest<ServerDetailVO>(urls.getServerDetail(serverId)),
+  getServerDetail: (serverId: number) => getRequest<ServerDetailVO>(urls.getServerDetail(serverId)),
   /** 编辑服务器 */
   updateServer: (serverId: number, data: { name?: string; description?: string; icon?: string }) =>
     putRequest<ServerVO>(urls.updateServer(serverId), data),
   /** 删除服务器 */
   deleteServer: (serverId: number) => deleteRequest<void>(urls.deleteServer(serverId)),
   /** 获取各频道未读计数 */
-  getUnread: (serverId: number) =>
-    getRequest<Record<number, number>>(urls.getUnread(serverId)),
+  getUnread: (serverId: number) => getRequest<Record<number, number>>(urls.getUnread(serverId)),
 
   // ============ Category ============
   /** 创建分类 */
@@ -96,8 +93,7 @@ export default {
   createChannel: (serverId: number, data: CreateChannelReq) =>
     postRequest<ChannelVO>(urls.createChannel(serverId), data),
   /** 频道列表（嵌套结构，按分类分组） */
-  getChannels: (serverId: number) =>
-    getRequest<CategoryVO[]>(urls.getChannels(serverId)),
+  getChannels: (serverId: number) => getRequest<CategoryVO[]>(urls.getChannels(serverId)),
   /** 频道详情 */
   getChannelDetail: (serverId: number, channelId: number) =>
     getRequest<ChannelVO>(urls.getChannelDetail(serverId, channelId)),
@@ -204,8 +200,7 @@ export default {
   getPresignedUrl: (data: { fileName: string; fileSize: number; mimeType: string }) =>
     postRequest<PresignedResp>(urls.getPresignedUrl, data),
   /** 确认上传完成 */
-  confirmUpload: (data: { fileId: number }) =>
-    postRequest<FileVO>(urls.confirmUpload, data),
+  confirmUpload: (data: { fileId: number }) => postRequest<FileVO>(urls.confirmUpload, data),
   /** 获取文件元数据 */
   getFile: (fileId: number) => getRequest<FileVO>(urls.getFile(fileId)),
   /** 获取文件下载 URL */

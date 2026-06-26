@@ -3,6 +3,7 @@ import { ref, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import apis from '@/services/apis'
 import { useServerStore } from '@/stores/server'
+import { ChannelType } from '@/services/types'
 import eventBus from '@/utils/eventBus'
 
 const serverStore = useServerStore()
@@ -18,31 +19,53 @@ function open() {
 }
 
 async function submit() {
-  if (!form.name.trim()) { ElMessage.warning('请输入服务器名称'); return }
+  if (!form.name.trim()) {
+    ElMessage.warning('请输入服务器名称')
+    return
+  }
   saving.value = true
   try {
     const server = await serverStore.createServer(form)
     if (server) {
+      // 创建默认分类和默认频道，确保每个服务器至少有一个频道
+      const cat = await apis.createCategory(server.id, { name: '默认分类' }).send()
+      await apis
+        .createChannel(server.id, { name: '默认频道', type: ChannelType.TEXT, categoryId: cat.id })
+        .send()
       ElMessage.success('服务器创建成功')
       visible.value = false
       eventBus.emit('serverCreated', server)
     }
   } catch {
     ElMessage.error('创建失败')
-  } finally { saving.value = false }
+  } finally {
+    saving.value = false
+  }
 }
 
 defineExpose({ open })
 </script>
 
 <template>
-  <el-dialog v-model="visible" title="创建服务器" width="480px" :close-on-click-modal="false" center>
+  <el-dialog
+    v-model="visible"
+    title="创建服务器"
+    width="480px"
+    :close-on-click-modal="false"
+    center
+  >
     <el-form label-position="top" @submit.prevent="submit">
       <el-form-item label="服务器名称" required>
         <el-input v-model="form.name" maxlength="32" placeholder="给你的服务器起个名字" />
       </el-form-item>
       <el-form-item label="服务器描述">
-        <el-input v-model="form.description" type="textarea" :rows="3" maxlength="256" placeholder="描述一下这个服务器（选填）" />
+        <el-input
+          v-model="form.description"
+          type="textarea"
+          :rows="3"
+          maxlength="256"
+          placeholder="描述一下这个服务器（选填）"
+        />
       </el-form-item>
     </el-form>
     <template #footer>

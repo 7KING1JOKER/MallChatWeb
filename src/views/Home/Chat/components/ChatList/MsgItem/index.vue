@@ -18,13 +18,32 @@ const globalStore = useGlobalStore()
 const sender = useUserInfo(props.message.fromUser.id)
 const isMe = computed(() => props.message.fromUser.id === userStore.userInfo.id)
 const isEdited = computed(() => props.message.status === 2)
-const time = computed(() => props.message.createTime ? formatTimestamp(new Date(props.message.createTime).getTime()) : '')
-const replyMsg = computed(() => props.message.replyMsgId && globalStore.currentChannelId ? chatStore.getMessages(globalStore.currentChannelId).find(m => m.id === props.message.replyMsgId) : null)
-const replyContent = computed(() => replyMsg.value ? renderReplyContent(replyMsg.value.fromUser.nickname, replyMsg.value.msgType, replyMsg.value.content) : null)
+const time = computed(() =>
+  props.message.createTime ? formatTimestamp(new Date(props.message.createTime).getTime()) : '',
+)
+const replyMsg = computed(() =>
+  props.message.replyMsgId && globalStore.currentChannelId
+    ? chatStore
+        .getMessages(globalStore.currentChannelId)
+        .find((m) => m.id === props.message.replyMsgId)
+    : null,
+)
+const replyContent = computed(() =>
+  replyMsg.value
+    ? renderReplyContent(
+        replyMsg.value.fromUser.nickname,
+        replyMsg.value.msgType,
+        replyMsg.value.content,
+      )
+    : null,
+)
 
 async function toggleReaction(emoji: string) {
-  try { await apis.addReaction(props.message.id, emoji).send() }
-  catch { await apis.removeReaction(props.message.id, emoji).send() }
+  try {
+    await apis.addReaction(props.message.id, emoji).send()
+  } catch {
+    await apis.removeReaction(props.message.id, emoji).send()
+  }
 }
 </script>
 <template>
@@ -41,26 +60,106 @@ async function toggleReaction(emoji: string) {
         <div v-if="replyContent" class="reply-ref">{{ replyContent }}</div>
         <RenderMessage :message="message" />
         <div v-if="message.reactions?.length" class="reaction-row">
-          <span v-for="r in message.reactions" :key="r.emoji" :class="['reaction-chip', { reacted: r.reacted }]" @click="toggleReaction(r.emoji)">{{ r.emoji }} {{ r.count }}</span>
+          <span
+            v-for="r in message.reactions"
+            :key="r.emoji"
+            :class="['reaction-chip', { reacted: r.reacted }]"
+            @click="toggleReaction(r.emoji)"
+            >{{ r.emoji }} {{ r.count }}</span
+          >
         </div>
-        <div v-if="message.thread" class="thread-entry" @click="globalStore.enterThread(message.thread.id)">🧵 {{ message.thread.name || '话题' }} · {{ message.thread.messageCount }} 条回复</div>
+        <div
+          v-if="message.thread"
+          class="thread-entry"
+          @click="globalStore.enterThread(message.thread.id)"
+          >🧵 {{ message.thread.name || '话题' }} · {{ message.thread.messageCount }} 条回复</div
+        >
       </div>
     </div>
     <ContextMenu :message="message" />
   </div>
 </template>
 <style lang="scss" scoped>
-.msg-item { padding:2px 16px;&:hover{background-color:var(--bg-hover,rgba(255,255,255,.02))} }
-.time-block { text-align:center;font-size:12px;color:var(--font-secondary);margin:12px 0 }
-.msg-content { display:flex;gap:12px;padding:4px 0 }
-.msg-avatar { flex-shrink:0;margin-top:2px }
-.msg-body { flex:1;min-width:0 }
-.msg-header { display:flex;align-items:baseline;gap:8px;margin-bottom:2px }
-.msg-nickname { font-weight:500;font-size:14px }
-.msg-time { font-size:11px;color:var(--font-secondary) }
-.edited-tag { font-size:10px;color:var(--font-secondary) }
-.reply-ref { font-size:12px;color:var(--font-secondary);border-left:2px solid var(--font-secondary);padding-left:8px;margin-bottom:4px }
-.reaction-row { display:flex;gap:4px;margin-top:4px;flex-wrap:wrap }
-.reaction-chip { display:inline-flex;align-items:center;gap:2px;padding:2px 8px;border-radius:8px;font-size:13px;cursor:pointer;background-color:var(--bg-hover);&:hover{border:1px solid var(--el-color-primary)}&.reacted{background-color:var(--el-color-primary-light);border:1px solid var(--el-color-primary)} }
-.thread-entry { margin-top:4px;font-size:12px;color:var(--el-color-primary);cursor:pointer;&:hover{text-decoration:underline} }
+.msg-item {
+  padding: 2px 16px;
+  &:hover {
+    background-color: var(--bg-hover, rgba(255, 255, 255, 2%));
+  }
+}
+.time-block {
+  margin: 12px 0;
+  font-size: 12px;
+  color: var(--font-secondary);
+  text-align: center;
+}
+.msg-content {
+  display: flex;
+  gap: 12px;
+  padding: 4px 0;
+}
+.msg-avatar {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.msg-body {
+  flex: 1;
+  min-width: 0;
+}
+.msg-header {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  margin-bottom: 2px;
+}
+.msg-nickname {
+  font-size: 14px;
+  font-weight: 500;
+}
+.msg-time {
+  font-size: 11px;
+  color: var(--font-secondary);
+}
+.edited-tag {
+  font-size: 10px;
+  color: var(--font-secondary);
+}
+.reply-ref {
+  padding-left: 8px;
+  margin-bottom: 4px;
+  font-size: 12px;
+  color: var(--font-secondary);
+  border-left: 2px solid var(--font-secondary);
+}
+.reaction-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+.reaction-chip {
+  display: inline-flex;
+  gap: 2px;
+  align-items: center;
+  padding: 2px 8px;
+  font-size: 13px;
+  cursor: pointer;
+  background-color: var(--bg-hover);
+  border-radius: 8px;
+  &:hover {
+    border: 1px solid var(--el-color-primary);
+  }
+  &.reacted {
+    background-color: var(--el-color-primary-light);
+    border: 1px solid var(--el-color-primary);
+  }
+}
+.thread-entry {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--el-color-primary);
+  cursor: pointer;
+  &:hover {
+    text-decoration: underline;
+  }
+}
 </style>

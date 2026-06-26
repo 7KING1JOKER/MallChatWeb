@@ -7,7 +7,11 @@ export const useEmojiUpload = () => {
 
   async function uploadEmoji(serverId: number, file: File) {
     isEmojiUp.value = true
-    try { await emojiStore.uploadEmojiAction(serverId, file) } finally { isEmojiUp.value = false }
+    try {
+      await emojiStore.uploadEmojiAction(serverId, file)
+    } finally {
+      isEmojiUp.value = false
+    }
   }
 
   return { uploadEmoji, isEmojiUp }

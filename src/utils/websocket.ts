@@ -21,6 +21,7 @@ import { computedToken } from '@/services/request'
 import { worker } from './initWorker'
 import shakeTitle from '@/utils/shakeTitle'
 import notify from '@/utils/notification'
+import eventBus from '@/utils/eventBus'
 
 class WS {
   #tasks: WsReqMsgContentType[] = []
@@ -207,8 +208,11 @@ class WS {
       // 新消息推送
       case WsResponseMessageType.MESSAGE_CREATE: {
         const data = params.data as MessageVO
-        if (data.threadId) { chatStore.pushThreadMessage(data) }
-        else { chatStore.pushMessage(data) }
+        if (data.threadId) {
+          chatStore.pushThreadMessage(data)
+        } else {
+          chatStore.pushMessage(data)
+        }
         break
       }
       case WsResponseMessageType.MESSAGE_UPDATE: {
@@ -218,7 +222,7 @@ class WS {
       }
       case WsResponseMessageType.MESSAGE_DELETE: {
         const data = params.data as MessageDeletePayload
-        chatStore.deleteMsg(data.msgId)
+        chatStore.deleteMessage(data.msgId)
         break
       }
 
@@ -226,15 +230,34 @@ class WS {
       case WsResponseMessageType.REACTION_ADD:
       case WsResponseMessageType.REACTION_REMOVE: {
         const data = params.data as ReactionPayload
-        chatStore.updateReaction(data.messageId, { emoji: data.e, count: data.count, userIds: [], reacted: true })
+        chatStore.updateReaction(data.messageId, {
+          emoji: data.e,
+          count: data.count,
+          userIds: [],
+          reacted: true,
+        })
         break
       }
 
       // ====== 输入状态 ======
-      case WsResponseMessageType.TYPING_START_PUSH:
+      case WsResponseMessageType.TYPING_START_PUSH: {
+        const data = params.data as TypingPayload
+        eventBus.emit('typingUsers', {
+          channelId: data.cid,
+          threadId: data.tid,
+          userId: data.uid,
+          isTyping: true,
+        })
+        break
+      }
       case WsResponseMessageType.TYPING_STOP_PUSH: {
         const data = params.data as TypingPayload
-        // TODO: Person C — UI 显示"xxx 正在输入..."（通过 eventBus 通知视图）
+        eventBus.emit('typingUsers', {
+          channelId: data.cid,
+          threadId: data.tid,
+          userId: data.uid,
+          isTyping: false,
+        })
         break
       }
 
@@ -275,10 +298,20 @@ class WS {
       }
 
       // ====== 频道/服务器变更 ======
-      case WsResponseMessageType.CHANNEL_CREATE:
-      case WsResponseMessageType.CHANNEL_UPDATE:
+      case WsResponseMessageType.CHANNEL_CREATE: {
+        // ChannelVO 不含 categoryId，刷新服务器详情获取完整分类树
+        const sid = globalStore.currentServerId
+        if (sid) serverStore.getServerDetail(sid)
+        break
+      }
+      case WsResponseMessageType.CHANNEL_UPDATE: {
+        const data = params.data as import('@/services/types').ChannelVO
+        serverStore.updateChannel(data)
+        break
+      }
       case WsResponseMessageType.CHANNEL_DELETE: {
-        // 频道变更 — 由 serverStore 处理
+        const payload = params.data as import('./wsType').ChannelDeletePayload
+        serverStore.removeChannelFromTree(payload.cid)
         break
       }
       case WsResponseMessageType.SERVER_UPDATE: {

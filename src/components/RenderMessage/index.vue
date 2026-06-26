@@ -8,7 +8,13 @@ import File from './file.vue'
 import Text from './text.vue'
 
 const props = defineProps<{ message: MessageVO }>()
-const cmp: Record<number, any> = { [MsgEnum.TEXT]: Text, [MsgEnum.SYSTEM]: Text, [MsgEnum.IMAGE]: Image, [MsgEnum.FILE]: File, [MsgEnum.SOUND]: Voice }
+const cmp: Record<number, any> = {
+  [MsgEnum.TEXT]: Text,
+  [MsgEnum.SYSTEM]: Text,
+  [MsgEnum.IMAGE]: Image,
+  [MsgEnum.FILE]: File,
+  [MsgEnum.SOUND]: Voice,
+}
 const comp = computed(() => cmp[props.message.msgType] || Text)
 </script>
 <template>

@@ -13,13 +13,25 @@ const channelId = computed(() => globalStore.currentChannelId!)
 const messages = computed(() => computedTimeBlock(chatStore.getMessages(channelId.value)))
 const pageState = computed(() => chatStore.messageOptions.get(channelId.value))
 
-function scrollToBottom() { nextTick(() => { if (listRef.value) listRef.value.scrollTop = listRef.value.scrollHeight }) }
+function scrollToBottom() {
+  nextTick(() => {
+    if (listRef.value) listRef.value.scrollTop = listRef.value.scrollHeight
+  })
+}
 
-watch(channelId, (cid) => { if (cid) chatStore.getChannelMessages(cid).then(scrollToBottom) }, { immediate: true })
+watch(
+  channelId,
+  (cid) => {
+    if (cid) chatStore.getChannelMessages(cid).then(scrollToBottom)
+  },
+  { immediate: true },
+)
 
 function onScroll() {
-  const el = listRef.value; if (!el || !pageState.value) return
-  if (el.scrollTop <= 50 && !pageState.value.isLast && !pageState.value.isLoading) chatStore.getChannelMessages(channelId.value)
+  const el = listRef.value
+  if (!el || !pageState.value) return
+  if (el.scrollTop <= 50 && !pageState.value.isLast && !pageState.value.isLoading)
+    chatStore.getChannelMessages(channelId.value)
 }
 </script>
 <template>
@@ -29,6 +41,15 @@ function onScroll() {
   </div>
 </template>
 <style lang="scss" scoped>
-.chat-list { flex:1;overflow-y:auto;padding:16px 0 }
-.end-hint { text-align:center;font-size:12px;color:var(--font-secondary);padding:8px }
+.chat-list {
+  flex: 1;
+  padding: 16px 0;
+  overflow-y: auto;
+}
+.end-hint {
+  padding: 8px;
+  font-size: 12px;
+  color: var(--font-secondary);
+  text-align: center;
+}
 </style>

@@ -16,7 +16,24 @@ const user = computed(() => userStore.userInfo)
   </div>
 </template>
 <style lang="scss" scoped>
-.user-panel { display:flex;align-items:center;padding:8px 12px;background-color:var(--bg-dark,rgba(0,0,0,.2)) }
-.user-info { display:flex;align-items:center;gap:8px;cursor:pointer;flex:1 }
-.nickname { font-size:14px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap }
+.user-panel {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: var(--bg-dark, rgba(0, 0, 0, 20%));
+}
+.user-info {
+  display: flex;
+  flex: 1;
+  gap: 8px;
+  align-items: center;
+  cursor: pointer;
+}
+.nickname {
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 </style>

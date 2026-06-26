@@ -8,7 +8,11 @@ export const useUserStore = defineStore('user', () => {
   const isSign = ref(false)
 
   let localUserInfo = {}
-  try { localUserInfo = JSON.parse(localStorage.getItem('USER_INFO') || '{}') } catch { localUserInfo = {} }
+  try {
+    localUserInfo = JSON.parse(localStorage.getItem('USER_INFO') || '{}')
+  } catch {
+    localUserInfo = {}
+  }
   if (!Object.keys(userInfo.value).length && Object.keys(localUserInfo).length) {
     userInfo.value = localUserInfo
   }
@@ -22,7 +26,8 @@ export const useUserStore = defineStore('user', () => {
       const data = await apis.getUserMe().send()
       userInfo.value = { ...userInfo.value, ...data }
     } catch {
-      localStorage.removeItem('TOKEN'); localStorage.removeItem('USER_INFO')
+      localStorage.removeItem('TOKEN')
+      localStorage.removeItem('USER_INFO')
     }
   }
 

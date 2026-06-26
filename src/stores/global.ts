@@ -47,15 +47,24 @@ export const useGlobalStore = defineStore('global', () => {
 
   async function loadUnread(serverId: number) {
     try {
-      const data = await apis.getUnread(serverId)
+      const data = await apis.getUnread(serverId).send()
       for (const chId in data) {
         unreadCounts.set(Number(chId), data[chId])
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }
 
   return {
-    currentServerId, currentChannelId, currentThreadId, unreadCounts,
-    enterServer, enterChannel, enterThread, leaveThread, loadUnread,
+    currentServerId,
+    currentChannelId,
+    currentThreadId,
+    unreadCounts,
+    enterServer,
+    enterChannel,
+    enterThread,
+    leaveThread,
+    loadUnread,
   }
 })

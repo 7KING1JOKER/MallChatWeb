@@ -11,7 +11,32 @@ const collapsed = ref(false)
   </div>
 </template>
 <style lang="scss" scoped>
-.category-header { display:flex;align-items:center;gap:4px;padding:8px 12px;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--font-secondary,#949ba4);cursor:pointer;user-select:none;&:hover{color:var(--font-main)} }
-.arrow { font-size:10px;transition:transform .2s;&.rotated{transform:rotate(90deg)} }
-.category-name { flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap }
+.category-header {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--font-secondary, #949ba4);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  user-select: none;
+  &:hover {
+    color: var(--font-main);
+  }
+}
+.arrow {
+  font-size: 10px;
+  transition: transform 0.2s;
+  &.rotated {
+    transform: rotate(90deg);
+  }
+}
+.category-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 </style>

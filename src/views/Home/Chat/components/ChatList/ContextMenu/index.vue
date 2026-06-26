@@ -14,14 +14,25 @@ const chatStore = useChatStore()
 const serverStore = useServerStore()
 const globalStore = useGlobalStore()
 const isAuthor = computed(() => props.message.fromUser.id === userStore.userInfo.id)
-const canManage = computed(() => serverStore.hasPermission(PermissionBit.ADMINISTRATOR) || serverStore.hasPermission(PermissionBit.MANAGE_CHANNELS))
+const canManage = computed(
+  () =>
+    serverStore.hasPermission(PermissionBit.ADMINISTRATOR) ||
+    serverStore.hasPermission(PermissionBit.MANAGE_CHANNELS),
+)
 
-function replyTo() { chatStore.setReply(props.message) }
-async function deleteMsg() { await chatStore.deleteMsg(props.message.id) }
+function replyTo() {
+  chatStore.setReply(props.message)
+}
+async function deleteMsg() {
+  await chatStore.deleteMessage(props.message.id)
+}
 async function createThread() {
   if (!globalStore.currentChannelId) return
-  try { await apis.createThread(globalStore.currentChannelId, { rootMsgId: props.message.id }).send() }
-  catch { /* handle error */ }
+  try {
+    await apis.createThread(globalStore.currentChannelId, { rootMsgId: props.message.id }).send()
+  } catch {
+    /* handle error */
+  }
 }
 const emojis = ['👍', '❤️', '😂', '🎉', '🔥']
 const emit = defineEmits<{ edit: [msgId: number] }>()
@@ -37,9 +48,46 @@ const emit = defineEmits<{ edit: [msgId: number] }>()
   </div>
 </template>
 <style lang="scss" scoped>
-.context-menu { position:absolute;right:16px;top:0;display:none;background-color:var(--background-wrapper);border:1px solid var(--divider-color);border-radius:4px;padding:4px 0;box-shadow:0 2px 8px rgba(0,0,0,.3);z-index:100 }
-.msg-item:hover .context-menu { display:block }
-.menu-item { padding:6px 16px;font-size:13px;cursor:pointer;white-space:nowrap;&:hover{background-color:var(--bg-hover)}&.danger{color:var(--el-color-danger)} }
-.menu-sep { height:1px;background:var(--divider-color);margin:2px 8px }
-.menu-emoji { display:inline-block;padding:4px 8px;font-size:16px;cursor:pointer;border-radius:4px;&:hover{background-color:var(--bg-hover)} }
+.context-menu {
+  position: absolute;
+  top: 0;
+  right: 16px;
+  z-index: 100;
+  display: none;
+  padding: 4px 0;
+  background-color: var(--background-wrapper);
+  border: 1px solid var(--divider-color);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 30%);
+}
+.msg-item:hover .context-menu {
+  display: block;
+}
+.menu-item {
+  padding: 6px 16px;
+  font-size: 13px;
+  white-space: nowrap;
+  cursor: pointer;
+  &:hover {
+    background-color: var(--bg-hover);
+  }
+  &.danger {
+    color: var(--el-color-danger);
+  }
+}
+.menu-sep {
+  height: 1px;
+  margin: 2px 8px;
+  background: var(--divider-color);
+}
+.menu-emoji {
+  display: inline-block;
+  padding: 4px 8px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 4px;
+  &:hover {
+    background-color: var(--bg-hover);
+  }
+}
 </style>
