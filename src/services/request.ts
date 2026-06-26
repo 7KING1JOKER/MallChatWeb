@@ -37,7 +37,10 @@ export const alovaIns = createAlova({
     // 假设我们需要添加token到请求头
     config.headers.Authorization = `Bearer ${computedToken.get()}`
 
-    config.headers['Content-Type'] = 'application/json; charset=utf-8'
+    // FormData 上传不设 Content-Type，让浏览器自动生成 boundary
+    if (!(config.body instanceof FormData)) {
+      config.headers['Content-Type'] = 'application/json; charset=utf-8'
+    }
   },
 
   // 响应拦截器，也与axios类似

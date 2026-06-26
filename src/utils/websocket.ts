@@ -8,7 +8,6 @@ import { useEmojiStore } from '@/stores/emoji'
 import { WsResponseMessageType, WsRequestMsgType } from './wsType'
 import type {
   LoginSuccessResType,
-  LoginInitResType,
   WsReqMsgContentType,
   MessageDeletePayload,
   ReactionPayload,
@@ -93,9 +92,6 @@ class WS {
         })
         // 清空缓存的消息
         this.#tasks = []
-      } else {
-        // 如果没登录，而且已经请求了登录二维码，就要更新登录二维码。
-        loginStore.loginQrCode && loginStore.getLoginQrCode()
       }
     }, 500)
   }
@@ -158,19 +154,8 @@ class WS {
     const globalStore = useGlobalStore()
     const emojiStore = useEmojiStore()
     switch (params.type) {
-      // ====== 登录相关（复用 MallChat） ======
-      // 获取登录二维码
-      case WsResponseMessageType.LOGIN_URL: {
-        const data = params.data as LoginInitResType
-        loginStore.loginQrCode = data.loginUrl
-        break
-      }
-      // 等待授权
-      case WsResponseMessageType.LOGIN_SCAN_SUCCESS: {
-        loginStore.loginStatus = LoginStatus.Waiting
-        break
-      }
-      // 登录成功
+      // ====== 登录相关 ======
+      // 登录成功（JWT 鉴权通过后 WS 推送）
       case WsResponseMessageType.LOGIN_SUCCESS: {
         userStore.isSign = true
         const data = params.data as LoginSuccessResType
@@ -188,10 +173,6 @@ class WS {
         userStore.getUserMeAction()
         // 关闭登录弹窗
         loginStore.showLogin = false
-        // 清空登录二维码
-        loginStore.loginQrCode = undefined
-        // 自定义表情列表 — TODO: Person B 适配 Server 级表情
-        // emojiStore 登录后不自动加载，由频道面板按需加载
         break
       }
       // Token 过期

@@ -18,7 +18,8 @@ export const useEmojiStore = defineStore('emoji', () => {
   }
   async function uploadEmojiAction(serverId: number, file: File) {
     const form = new FormData()
-    form.append('file', file)
+    form.append('imageFile', file)
+    form.append('name', file.name.replace(/\.[^.]+$/, ''))
     await apis.uploadEmoji(serverId, form).send()
     await getEmojiList(serverId)
   }

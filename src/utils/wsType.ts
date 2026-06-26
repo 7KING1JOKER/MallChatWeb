@@ -3,10 +3,6 @@
  * 与后端 WSRespTypeEnum.java 严格对齐
  */
 export enum WsResponseMessageType {
-  /** 1.登录二维码返回 */
-  LOGIN_URL = 1,
-  /** 2.用户扫描成功等待授权 */
-  LOGIN_SCAN_SUCCESS = 2,
   /** 3.用户登录成功返回用户信息 */
   LOGIN_SUCCESS = 3,
   /** 6.使前端的token失效 */
@@ -54,8 +50,6 @@ export enum WsResponseMessageType {
  * 与后端 WSReqTypeEnum.java 严格对齐
  */
 export enum WsRequestMsgType {
-  /** 1.登录认证（请求二维码） */
-  LOGIN = 1,
   /** 2.心跳 */
   HEARTBEAT = 2,
   /** 4.发送消息 */
@@ -81,9 +75,6 @@ export type WsReqMsgContentType = {
 }
 
 // ==================== WS Payload 类型（字段名与后端 WSAdapter 严格对齐） ====================
-
-/** type=1 登录二维码返回（对应 WSLoginUrl） */
-export type LoginInitResType = { loginUrl: string }
 
 /** type=3 登录成功（对应 WSLoginSuccess） */
 export type LoginSuccessResType = {
