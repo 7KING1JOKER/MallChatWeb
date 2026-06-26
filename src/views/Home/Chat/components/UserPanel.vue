@@ -22,6 +22,7 @@ const user = computed(() => userStore.userInfo)
   padding: 8px 12px;
   background-color: var(--bg-dark, rgba(0, 0, 0, 20%));
 }
+
 .user-info {
   display: flex;
   flex: 1;
@@ -29,6 +30,7 @@ const user = computed(() => userStore.userInfo)
   align-items: center;
   cursor: pointer;
 }
+
 .nickname {
   overflow: hidden;
   font-size: 14px;

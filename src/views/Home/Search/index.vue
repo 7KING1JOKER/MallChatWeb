@@ -38,34 +38,41 @@ async function search() {
   padding: 24px;
   overflow-y: auto;
 }
+
 .search-bar {
   max-width: 600px;
   margin-bottom: 16px;
 }
+
 .loading {
   padding: 24px;
   color: var(--font-secondary);
   text-align: center;
 }
+
 .search-result {
   padding: 12px;
   margin-bottom: 8px;
   background-color: var(--bg-hover);
   border-radius: 6px;
 }
+
 .result-header {
   display: flex;
   gap: 12px;
   margin-bottom: 4px;
 }
+
 .result-author {
   font-size: 14px;
   font-weight: 500;
 }
+
 .result-time {
   font-size: 12px;
   color: var(--font-secondary);
 }
+
 .result-content {
   font-size: 13px;
 }

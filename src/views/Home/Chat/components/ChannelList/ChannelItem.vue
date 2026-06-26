@@ -49,6 +49,7 @@ const badge = computed(() =>
     color: var(--font-main, #fff);
     background: var(--bg-active, rgba(88, 101, 242, 15%));
     border-color: var(--el-color-primary, #5865f2);
+
     .channel-icon {
       color: var(--el-color-primary, #5865f2);
     }
@@ -58,6 +59,7 @@ const badge = computed(() =>
 .card-left {
   flex-shrink: 0;
 }
+
 .channel-icon {
   display: flex;
   align-items: center;
@@ -77,12 +79,14 @@ const badge = computed(() =>
   gap: 2px;
   min-width: 0;
 }
+
 .channel-name {
   overflow: hidden;
   font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
 .channel-topic {
   overflow: hidden;
   font-size: 12px;

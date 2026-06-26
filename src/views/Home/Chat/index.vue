@@ -89,12 +89,14 @@ function toggleMemberPanel() {
   height: 100%;
   overflow: hidden;
 }
+
 .chat-main {
   display: flex;
   flex: 1;
   flex-direction: column;
   min-width: 0;
 }
+
 .no-channel {
   display: flex;
   flex: 1;
@@ -103,15 +105,19 @@ function toggleMemberPanel() {
   font-size: 16px;
   color: var(--font-secondary);
 }
+
 .no-channel-inner {
   text-align: center;
+
   .no-channel-icon {
     display: block;
     margin-bottom: 12px;
     font-size: 48px;
   }
+
   p {
     margin: 0;
+
     &.sub {
       margin-top: 6px;
       font-size: 13px;

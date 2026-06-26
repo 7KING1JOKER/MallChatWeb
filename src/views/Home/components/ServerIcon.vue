@@ -44,10 +44,12 @@ const badgeCount = computed(() => {
 .server-icon {
   border: 2px solid transparent;
   transition: border-radius 0.2s;
+
   &:hover {
     border-color: var(--el-color-primary);
     border-radius: 30%;
   }
+
   &.active {
     border-color: var(--el-color-primary);
     border-radius: 30%;

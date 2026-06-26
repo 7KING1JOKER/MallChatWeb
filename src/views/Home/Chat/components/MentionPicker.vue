@@ -34,16 +34,19 @@ const filtered = computed(() => {
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 30%);
 }
+
 .mention-item {
   display: flex;
   gap: 8px;
   align-items: center;
   padding: 8px 12px;
   cursor: pointer;
+
   &:hover {
     background-color: var(--bg-hover);
   }
 }
+
 .no-result {
   padding: 12px;
   font-size: 13px;

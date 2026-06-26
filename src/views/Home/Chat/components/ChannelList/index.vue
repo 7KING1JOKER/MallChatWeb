@@ -14,6 +14,27 @@ const router = useRouter()
 const serverStore = useServerStore()
 const globalStore = useGlobalStore()
 
+/** 服务器下拉菜单 */
+const showServerMenu = ref(false)
+function toggleServerMenu() {
+  showServerMenu.value = !showServerMenu.value
+}
+function goSettings() {
+  const sid = globalStore.currentServerId
+  if (sid) router.push(`/servers/${sid}/settings`)
+  showServerMenu.value = false
+}
+function goMembers() {
+  const sid = globalStore.currentServerId
+  if (sid) router.push(`/servers/${sid}/members`)
+  showServerMenu.value = false
+}
+function goSearch() {
+  const sid = globalStore.currentServerId
+  if (sid) router.push(`/servers/${sid}/search`)
+  showServerMenu.value = false
+}
+
 /** 分类列表（含折叠状态） */
 const categories = computed(() => serverStore.currentDetail?.categories || [])
 
@@ -92,7 +113,26 @@ async function createChannel() {
 </script>
 <template>
   <aside class="channel-panel">
-    <div class="server-name">{{ serverStore.currentServer?.name || '未选择服务器' }}</div>
+    <!-- 服务器名称 + 下拉菜单 -->
+    <div class="server-name-bar" @click="toggleServerMenu">
+      <span class="server-name">{{ serverStore.currentServer?.name || '未选择服务器' }}</span>
+      <el-icon class="server-chevron" :class="{ rotated: showServerMenu }"><IEpArrowDown /></el-icon>
+      <div v-if="showServerMenu" class="server-dropdown" @click.stop>
+        <div class="dropdown-item" @click="goMembers">
+          <span class="dd-icon">👥</span> 成员列表
+        </div>
+        <div class="dropdown-item" @click="goSearch">
+          <span class="dd-icon">🔍</span> 搜索消息
+        </div>
+        <div class="dropdown-sep" />
+        <div class="dropdown-item" @click="goSettings">
+          <span class="dd-icon">⚙️</span> 服务器设置
+        </div>
+        <div class="dropdown-item" @click="showServerMenu = false">
+          <span class="dd-icon">✕</span> 关闭菜单
+        </div>
+      </div>
+    </div>
 
     <!-- 未选服务器时提示 -->
     <div v-if="!hasServer" class="empty-hint">
@@ -152,20 +192,84 @@ async function createChannel() {
   height: 100%;
   background-color: var(--background-secondary, #2b2d31);
 }
-.server-name {
+
+.server-name-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 12px 16px;
-  overflow: hidden;
   font-size: 15px;
   font-weight: 600;
+  cursor: pointer;
+  border-bottom: 1px solid var(--divider-color, rgba(255, 255, 255, 6%));
+  transition: background-color 0.15s;
+  user-select: none;
+
+  &:hover {
+    background-color: var(--bg-hover, rgba(255, 255, 255, 5%));
+  }
+}
+.server-name {
+  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  border-bottom: 1px solid var(--divider-color, rgba(255, 255, 255, 6%));
 }
+.server-chevron {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--font-secondary);
+  transition: transform 0.2s;
+  &.rotated {
+    transform: rotate(180deg);
+  }
+}
+.server-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 8px;
+  z-index: 200;
+  width: 200px;
+  padding: 6px;
+  margin-top: 4px;
+  background-color: var(--background-wrapper, #272a37);
+  border: 1px solid var(--divider-color, rgba(255, 255, 255, 8%));
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 40%);
+}
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--font-secondary);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.12s;
+  &:hover {
+    color: var(--font-main);
+    background-color: var(--bg-hover, rgba(255, 255, 255, 6%));
+  }
+}
+.dd-icon {
+  width: 20px;
+  text-align: center;
+  font-size: 14px;
+}
+.dropdown-sep {
+  height: 1px;
+  margin: 4px 8px;
+  background-color: var(--divider-color, rgba(255, 255, 255, 8%));
+}
+
 .channel-tree {
   flex: 1;
   padding: 8px;
   overflow-y: auto;
 }
+
 .empty-hint {
   display: flex;
   flex: 1;
@@ -177,11 +281,13 @@ async function createChannel() {
   font-size: 14px;
   color: var(--font-secondary);
   text-align: center;
+
   .sub {
     font-size: 12px;
     opacity: 0.7;
   }
 }
+
 .category-header-item {
   display: flex;
   gap: 4px;
@@ -193,41 +299,50 @@ async function createChannel() {
   letter-spacing: 0.5px;
   cursor: pointer;
   user-select: none;
+
   &:hover {
     color: var(--font-main);
   }
 }
+
 .arrow {
   font-size: 10px;
   transition: transform 0.2s;
+
   &.rotated {
     transform: rotate(90deg);
   }
 }
+
 .category-name {
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
 .category-channels {
   /* channels under this category */
 }
+
 .create-channel-bar {
   padding: 8px 12px;
   border-top: 1px solid var(--divider-color, rgba(255, 255, 255, 6%));
 }
+
 .create-btn {
   padding: 6px;
   font-size: 13px;
   color: var(--font-secondary);
   cursor: pointer;
   border-radius: 4px;
+
   &:hover {
     color: var(--font-main);
     background-color: var(--bg-hover);
   }
 }
+
 .create-form {
   display: flex;
   gap: 4px;

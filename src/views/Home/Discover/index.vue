@@ -52,19 +52,23 @@ async function join(sid: number) {
   padding: 24px;
   overflow-y: auto;
 }
+
 h2 {
   margin-bottom: 16px;
 }
+
 .loading {
   padding: 40px;
   color: var(--font-secondary);
   text-align: center;
 }
+
 .server-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 16px;
 }
+
 .server-card {
   display: flex;
   gap: 12px;
@@ -73,19 +77,23 @@ h2 {
   background-color: var(--background-secondary);
   border-radius: 8px;
   transition: box-shadow 0.2s;
+
   &:hover {
     box-shadow: 0 2px 12px rgba(0, 0, 0, 20%);
   }
 }
+
 .card-body {
   flex: 1;
   min-width: 0;
 }
+
 .card-name {
   margin-bottom: 4px;
   font-size: 16px;
   font-weight: 600;
 }
+
 .card-desc {
   margin-bottom: 6px;
   overflow: hidden;
@@ -94,6 +102,7 @@ h2 {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
 .card-meta {
   font-size: 12px;
   color: var(--font-secondary);

@@ -22,17 +22,21 @@ const collapsed = ref(false)
   letter-spacing: 0.5px;
   cursor: pointer;
   user-select: none;
+
   &:hover {
     color: var(--font-main);
   }
 }
+
 .arrow {
   font-size: 10px;
   transition: transform 0.2s;
+
   &.rotated {
     transform: rotate(90deg);
   }
 }
+
 .category-name {
   flex: 1;
   overflow: hidden;

@@ -82,47 +82,57 @@ async function toggleReaction(emoji: string) {
 <style lang="scss" scoped>
 .msg-item {
   padding: 2px 16px;
+
   &:hover {
     background-color: var(--bg-hover, rgba(255, 255, 255, 2%));
   }
 }
+
 .time-block {
   margin: 12px 0;
   font-size: 12px;
   color: var(--font-secondary);
   text-align: center;
 }
+
 .msg-content {
   display: flex;
   gap: 12px;
   padding: 4px 0;
 }
+
 .msg-avatar {
   flex-shrink: 0;
   margin-top: 2px;
 }
+
 .msg-body {
   flex: 1;
   min-width: 0;
 }
+
 .msg-header {
   display: flex;
   gap: 8px;
   align-items: baseline;
   margin-bottom: 2px;
 }
+
 .msg-nickname {
   font-size: 14px;
   font-weight: 500;
 }
+
 .msg-time {
   font-size: 11px;
   color: var(--font-secondary);
 }
+
 .edited-tag {
   font-size: 10px;
   color: var(--font-secondary);
 }
+
 .reply-ref {
   padding-left: 8px;
   margin-bottom: 4px;
@@ -130,12 +140,14 @@ async function toggleReaction(emoji: string) {
   color: var(--font-secondary);
   border-left: 2px solid var(--font-secondary);
 }
+
 .reaction-row {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
   margin-top: 4px;
 }
+
 .reaction-chip {
   display: inline-flex;
   gap: 2px;
@@ -145,19 +157,23 @@ async function toggleReaction(emoji: string) {
   cursor: pointer;
   background-color: var(--bg-hover);
   border-radius: 8px;
+
   &:hover {
     border: 1px solid var(--el-color-primary);
   }
+
   &.reacted {
     background-color: var(--el-color-primary-light);
     border: 1px solid var(--el-color-primary);
   }
 }
+
 .thread-entry {
   margin-top: 4px;
   font-size: 12px;
   color: var(--el-color-primary);
   cursor: pointer;
+
   &:hover {
     text-decoration: underline;
   }

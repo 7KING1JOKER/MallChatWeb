@@ -71,8 +71,10 @@ async function onServerClick(serverId: number) {
   overflow-y: auto;
   background-color: var(--background-dark, #1e1e2e);
 }
+
 .discover-link {
   margin-bottom: 4px;
+
   .discover-icon {
     display: flex;
     align-items: center;
@@ -80,18 +82,21 @@ async function onServerClick(serverId: number) {
     font-size: 24px;
     background: var(--bg-hover, rgba(255, 255, 255, 5%));
     transition: border-radius 0.2s;
+
     &:hover {
       background: var(--el-color-primary);
       border-radius: 30%;
     }
   }
 }
+
 .server-icons {
   display: flex;
   flex-direction: column;
   gap: 4px;
   align-items: center;
 }
+
 .divider {
   width: 32px;
   height: 2px;
@@ -99,11 +104,14 @@ async function onServerClick(serverId: number) {
   background-color: var(--divider-color, rgba(255, 255, 255, 10%));
   border-radius: 1px;
 }
+
 .create-server-btn {
   cursor: pointer;
+
   .add-server-icon {
     background-color: var(--bg-hover, rgba(255, 255, 255, 5%));
     transition: background-color 0.2s, border-radius 0.2s;
+
     &:hover {
       background-color: var(--el-color-primary);
       border-radius: 30%;

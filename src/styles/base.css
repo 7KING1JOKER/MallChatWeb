@@ -14,6 +14,7 @@
   /* font */
   --font-placeholder: #a8abb2;
   --font-main: #fff;
+  --font-secondary: #949ba4;
   --font-base: #333;
   --font-gray: #666;
   --font-light: #999;
@@ -32,6 +33,15 @@
   --background-3: #424656;
   --background-4: #efe2bb;
 
+  /* 组件级变量 */
+  --bg-hover: rgba(255, 255, 255, 6%);
+  --bg-card: rgba(255, 255, 255, 3%);
+  --bg-active: rgba(88, 101, 242, 12%);
+  --bg-input: rgba(255, 255, 255, 5%);
+  --bg-input-focus: rgba(255, 255, 255, 8%);
+  --bg-dark: rgba(0, 0, 0, 20%);
+  --divider-color: rgba(255, 255, 255, 6%);
+
   /* hover */
   --hover-primary: #2287e1;
   --hover-bg-1: #484d5f;
@@ -39,7 +49,7 @@
 
   /* border */
   --border-base: var(--color-background-1);
-  --border-pink: #b52c47;
+  --border-pink: #b52c27;
 }
 
 /* @media (prefers-color-scheme: dark) {

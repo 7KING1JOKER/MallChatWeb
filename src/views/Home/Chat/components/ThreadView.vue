@@ -56,6 +56,7 @@ onMounted(async () => {
   flex-direction: column;
   height: 100%;
 }
+
 .thread-header {
   display: flex;
   gap: 8px;
@@ -63,18 +64,22 @@ onMounted(async () => {
   padding: 12px 16px;
   border-bottom: 1px solid var(--divider-color);
 }
+
 .back-btn {
   font-size: 13px;
   color: var(--el-color-primary);
   cursor: pointer;
+
   &:hover {
     text-decoration: underline;
   }
 }
+
 .thread-title {
   flex: 1;
   font-weight: 600;
 }
+
 .thread-status {
   padding: 2px 8px;
   font-size: 11px;
@@ -82,36 +87,44 @@ onMounted(async () => {
   background-color: var(--bg-hover);
   border-radius: 4px;
 }
+
 .thread-messages {
   flex: 1;
   padding: 8px 0;
   overflow-y: auto;
 }
+
 .thread-msg {
   display: flex;
   gap: 8px;
   padding: 6px 16px;
+
   &:hover {
     background-color: var(--bg-hover);
   }
 }
+
 .msg-avatar {
   flex-shrink: 0;
   margin-top: 2px;
 }
+
 .msg-body {
   flex: 1;
   min-width: 0;
 }
+
 .msg-author {
   margin-right: 8px;
   font-size: 13px;
   font-weight: 500;
 }
+
 .msg-content {
   font-size: 13px;
   color: var(--font-main);
 }
+
 .loading,
 .empty,
 .no-thread {

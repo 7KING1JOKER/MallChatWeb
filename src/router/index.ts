@@ -5,6 +5,10 @@ const HomeView = () => import(/* webpackChunkName: "Home" */ '@/views/Home/index
 const HomeChatView = () => import(/* webpackChunkName: "Home" */ '@/views/Home/Chat/index.vue')
 const DiscoverView = () => import(/* webpackChunkName: "Home" */ '@/views/Home/Discover/index.vue')
 const SearchView = () => import(/* webpackChunkName: "Home" */ '@/views/Home/Search/index.vue')
+const MemberListView = () =>
+  import(/* webpackChunkName: "Home" */ '@/views/Home/Server/MemberList/index.vue')
+const SettingsView = () =>
+  import(/* webpackChunkName: "Home" */ '@/views/Home/Server/Settings/index.vue')
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -28,6 +32,16 @@ const router = createRouter({
           path: 'servers/:serverId/channels/:channelId',
           name: 'channel',
           component: HomeChatView,
+        },
+        {
+          path: 'servers/:serverId/members',
+          name: 'members',
+          component: MemberListView,
+        },
+        {
+          path: 'servers/:serverId/settings',
+          name: 'settings',
+          component: SettingsView,
         },
         {
           path: 'servers/:serverId/search',

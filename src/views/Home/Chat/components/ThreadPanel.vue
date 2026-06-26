@@ -41,6 +41,7 @@ function openThread(tid: number) {
   min-width: 280px;
   background-color: var(--background-secondary);
 }
+
 .panel-header {
   display: flex;
   align-items: center;
@@ -49,23 +50,28 @@ function openThread(tid: number) {
   font-weight: 600;
   border-bottom: 1px solid var(--divider-color);
 }
+
 .thread-item {
   padding: 10px 16px;
   cursor: pointer;
   border-bottom: 1px solid var(--divider-color);
+
   &:hover {
     background-color: var(--bg-hover);
   }
 }
+
 .thread-name {
   font-size: 14px;
   font-weight: 500;
 }
+
 .thread-meta {
   margin-top: 2px;
   font-size: 12px;
   color: var(--font-secondary);
 }
+
 .loading,
 .empty {
   padding: 24px;
