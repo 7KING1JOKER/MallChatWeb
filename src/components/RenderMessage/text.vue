@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { TextBody } from '@/services/types'
-
-const props = defineProps<{ body: TextBody }>()
+const props = defineProps<{
+  body: { content?: string; urlContentMap?: Record<string, { image?: string; title?: string; description?: string }> }
+}>()
 
 // 获取所有匹配的字符串
 const urlMap = props.body.urlContentMap || {}

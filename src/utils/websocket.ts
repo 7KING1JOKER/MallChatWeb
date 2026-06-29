@@ -15,7 +15,7 @@ import type {
   MemberLeaveKickPayload,
   OnOffLinePayload,
 } from './wsType'
-import type { MessageVO, MemberVO } from '@/services/types'
+import type { MessageVO, MemberVO, ThreadVO } from '@/services/types'
 import { computedToken } from '@/services/request'
 import { worker } from './initWorker'
 import shakeTitle from '@/utils/shakeTitle'
@@ -145,8 +145,13 @@ class WS {
 
   // 收到消息回调
   onMessage = (value: string) => {
-    // FIXME 可能需要 try catch,
-    const params: { type: WsResponseMessageType; data: unknown } = JSON.parse(value)
+    let params: { type: WsResponseMessageType; data: unknown }
+    try {
+      params = JSON.parse(value)
+    } catch {
+      console.error('[WS] JSON.parse 失败，原始消息:', value)
+      return
+    }
     const loginStore = useWsLoginStore()
     const userStore = useUserStore()
     const serverStore = useServerStore()
@@ -260,9 +265,14 @@ class WS {
       }
 
       // ====== Thread 相关 ======
-      // type=34: 完整 ThreadVO 对象
       case WsResponseMessageType.THREAD_CREATE: {
-        // Thread 创建通知 — 由 ChatList 组件后续监听处理
+        const data = params.data as ThreadVO
+        // 将 Thread 摘要写入 rootMsgId 对应的消息，UI 通过 msg.thread 显示入口
+        chatStore.setMessageThread(data.rootMsgId, {
+          id: data.id,
+          name: data.name,
+          messageCount: data.messageCount ?? 1,
+        })
         break
       }
 

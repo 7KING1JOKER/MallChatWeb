@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { VoiceBody } from '@/services/types'
 import { useVoicePreviewStore } from '@/stores/preview'
 
-const props = defineProps<{ body: VoiceBody }>()
+const props = defineProps<{ body: { url: string; second?: number } }>()
 const voiceStore = useVoicePreviewStore()
 
 // 判断当前这个消息组件是否正在播放

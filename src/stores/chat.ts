@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, reactive } from 'vue'
 import apis from '@/services/apis'
 import { useGlobalStore } from '@/stores/global'
-import type { MessageVO, CursorPage, ReactionVO } from '@/services/types'
+import type { MessageVO, CursorPage, ReactionVO, ThreadSummaryVO } from '@/services/types'
 
 export const useChatStore = defineStore('chat', () => {
   const globalStore = useGlobalStore()
@@ -72,6 +72,17 @@ export const useChatStore = defineStore('chat', () => {
       const m = map.get(msgId)
       if (m) {
         m.status = 1
+        return
+      }
+    }
+  }
+
+  /** WS 推送 THREAD_CREATE 时更新消息的 Thread 入口 */
+  function setMessageThread(rootMsgId: number, thread: ThreadSummaryVO) {
+    for (const [, map] of messageMap) {
+      const msg = map.get(rootMsgId)
+      if (msg) {
+        msg.thread = thread
         return
       }
     }
@@ -170,6 +181,7 @@ export const useChatStore = defineStore('chat', () => {
     sendMessage,
     editMessage,
     deleteMessage,
+    setMessageThread,
     updateReaction,
     setReply,
     clearReply,

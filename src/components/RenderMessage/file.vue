@@ -2,12 +2,11 @@
 import { computed } from 'vue'
 import { Close } from '@element-plus/icons-vue'
 import { formatBytes, getFileSuffix } from '@/utils'
-import type { FileBody } from '@/services/types'
 import useDownloadQuenuStore from '@/stores/downloadQuenu'
 
 const { downloadObjMap, download, quenu, cancelDownload } = useDownloadQuenuStore()
 
-const props = defineProps<{ body: FileBody }>()
+const props = defineProps<{ body: { url: string; fileName?: string; size?: number } }>()
 
 // 下载文件
 const downloadFile = () => {
@@ -36,10 +35,10 @@ const isQuenu = computed(() => {
 
 <template>
   <div class="file">
-    <Icon :icon="getFileSuffix(body?.fileName)" :size="32" colorful />
+    <Icon :icon="getFileSuffix(body?.fileName ?? '')" :size="32" colorful />
     <div class="file-desc">
       <span class="file-name">{{ body?.fileName || '未知文件' }}</span>
-      <span class="file-size">{{ formatBytes(body?.size) }}</span>
+      <span class="file-size">{{ formatBytes(body?.size ?? 0) }}</span>
     </div>
     <el-text v-if="isQuenu" class="mx-1" size="small" type="warning" @click="cancelDownloadFile">
       等待下载

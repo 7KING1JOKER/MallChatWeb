@@ -464,16 +464,3 @@ export type RefreshTokenReq = {
 export type RefreshTokenResp = {
   token: string
 }
-
-// ==================== 旧类型别名（RenderMessage 子组件使用） ====================
-
-/** @deprecated 旧版消息体类型 */
-export type MsgType = any
-/** @deprecated RenderMessage/text.vue 使用 */
-export type TextBody = any
-/** @deprecated RenderMessage/image.vue 使用 */
-export type ImageBody = any
-/** @deprecated RenderMessage/voice.vue 使用 */
-export type VoiceBody = any
-/** @deprecated RenderMessage/file.vue 使用 */
-export type FileBody = any
