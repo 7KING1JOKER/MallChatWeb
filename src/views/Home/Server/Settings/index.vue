@@ -5,9 +5,10 @@ import SettingsOverview from './SettingsOverview.vue'
 import SettingsRoles from './SettingsRoles.vue'
 import SettingsEmoji from './SettingsEmoji.vue'
 import SettingsInvites from './SettingsInvites.vue'
+import SettingsPermissions from './SettingsPermissions.vue'  // 取消注释
 
 const route = useRoute()
-const tab = ref<'overview' | 'roles' | 'emoji' | 'invites'>('overview')
+const tab = ref<'overview' | 'roles' | 'emoji' | 'invites' | 'permissions'>('overview')
 
 const serverId = computed(() => route.params.serverId as string)
 
@@ -16,6 +17,7 @@ const tabs = [
   { key: 'roles' as const, label: '角色', icon: '🔐' },
   { key: 'emoji' as const, label: '表情', icon: '😀' },
   { key: 'invites' as const, label: '邀请', icon: '🔗' },
+  { key: 'permissions' as const, label: '频道权限', icon: '🔒' },
 ]
 </script>
 
@@ -36,7 +38,8 @@ const tabs = [
       <SettingsOverview v-if="tab === 'overview'" />
       <SettingsRoles v-else-if="tab === 'roles'" />
       <SettingsEmoji v-else-if="tab === 'emoji'" />
-      <SettingsInvites v-else />
+      <SettingsInvites v-else-if="tab === 'invites'" />
+      <SettingsPermissions v-else />
     </div>
   </div>
 </template>
