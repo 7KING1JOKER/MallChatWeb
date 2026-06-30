@@ -9,6 +9,8 @@ const MemberListView = () =>
   import(/* webpackChunkName: "Home" */ '@/views/Home/Server/MemberList/index.vue')
 const SettingsView = () =>
   import(/* webpackChunkName: "Home" */ '@/views/Home/Server/Settings/index.vue')
+const JoinServerView = () =>
+  import(/* webpackChunkName: "Home" */ '@/views/Home/JoinServer/index.vue')
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -29,7 +31,7 @@ const router = createRouter({
           component: DiscoverView,
         },
         {
-          path: 'servers/:serverId/channels/:channelId',
+          path: 'servers/:serverId/channels/:channelId?',
           name: 'channel',
           component: HomeChatView,
         },
@@ -47,6 +49,12 @@ const router = createRouter({
           path: 'servers/:serverId/search',
           name: 'search',
           component: SearchView,
+        },
+        // 新增：邀请链接加入页面
+        {
+          path: 'join/:serverId',
+          name: 'joinServer',
+          component: JoinServerView,
         },
       ],
     },
