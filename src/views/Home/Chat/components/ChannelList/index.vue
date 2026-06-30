@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed, ref, reactive, watch } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import apis from '@/services/apis'
 import { useServerStore } from '@/stores/server'
 import { useGlobalStore } from '@/stores/global'
 import { useRouter } from 'vue-router'
-import { ChannelType } from '@/services/types'
+import { ChannelType, PermissionBit } from '@/services/types'
 import type { ChannelVO } from '@/services/types'
 import ChannelItem from './ChannelItem.vue'
 import UserPanel from '../UserPanel.vue'
@@ -78,7 +78,7 @@ function toggleCategory(categoryId: number) {
   collapsedMap.set(categoryId, !collapsedMap.get(categoryId))
 }
 
-// 创建频道
+// ============ 创建频道 ============
 const showCreate = ref(false)
 const newChannel = ref({ name: '', categoryId: 0 })
 
@@ -110,7 +110,180 @@ async function createChannel() {
     ElMessage.error('创建失败')
   }
 }
+
+// ============ 编辑频道 ============
+const editDialogVisible = ref(false)
+const editLoading = ref(false)
+const editingChannel = ref<ChannelVO | null>(null)
+const editFormRef = ref()
+
+const editForm = ref({
+  name: '',
+  topic: ''
+})
+
+const editRules = {
+  name: [
+    { required: true, message: '请输入频道名称', trigger: 'blur' },
+    { min: 1, max: 32, message: '频道名称长度为 1-32 个字符', trigger: 'blur' }
+  ],
+  topic: [
+    { max: 256, message: '主题长度不能超过 256 个字符', trigger: 'blur' }
+  ]
+}
+
+function handleEditChannel(channel: ChannelVO) {
+  editingChannel.value = channel
+  editForm.value = {
+    name: channel.name || '',
+    topic: channel.topic || ''
+  }
+  editDialogVisible.value = true
+}
+
+async function submitEdit() {
+  if (!editingChannel.value) return
+  const sid = globalStore.currentServerId
+  if (!sid) return
+
+  // 表单验证
+  try {
+    await editFormRef.value?.validate()
+  } catch {
+    return
+  }
+
+  editLoading.value = true
+  try {
+    // 构建请求数据，只传有值的字段
+    const data: { name?: string; topic?: string } = {}
+    if (editForm.value.name.trim() !== editingChannel.value.name) {
+      data.name = editForm.value.name.trim()
+    }
+    if (editForm.value.topic.trim() !== (editingChannel.value.topic || '')) {
+      data.topic = editForm.value.topic.trim()
+    }
+    
+    // 如果没有任何修改，直接关闭弹窗
+    if (Object.keys(data).length === 0) {
+      ElMessage.info('没有修改任何内容')
+      editDialogVisible.value = false
+      return
+    }
+
+    await apis.updateChannel(
+      sid,
+      editingChannel.value.id,
+      data
+    ).send()
+
+    ElMessage.success('频道已更新')
+    editDialogVisible.value = false
+    
+    // 刷新频道列表
+    await serverStore.getServerDetail(sid)
+  } catch (error: any) {
+    console.error('编辑频道错误:', error)
+    const errData = error?.data || error?.response?.data
+    const errCode = errData?.code
+    const errMsg = errData?.message || error?.message || '更新频道失败'
+    
+    if (errCode === 2002) {
+      ElMessage.error('无权执行此操作')
+    } else if (errCode === 2005) {
+      ElMessage.error('频道不存在')
+    } else {
+      ElMessage.error(errMsg)
+    }
+  } finally {
+    editLoading.value = false
+  }
+}
+
+// ============ 删除频道 ============
+function handleDeleteChannel(channel: ChannelVO) {
+  ElMessageBox.confirm(
+    `确定删除频道「${channel.name}」？此操作不可撤销。`,
+    '警告',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+      confirmButtonClass: 'el-button--danger'
+    }
+  ).then(async () => {
+    const sid = globalStore.currentServerId
+    if (!sid) {
+      ElMessage.error('未选择服务器')
+      return
+    }
+
+    try {
+      // 发送删除请求，忽略响应（204 No Content）
+      await apis.deleteChannel(sid, channel.id).send()
+      
+      ElMessage.success(`频道「${channel.name}」已删除`)
+      
+      // 直接从本地数据中移除
+      const detail = serverStore.currentDetail
+      if (detail) {
+        for (const cat of detail.categories) {
+          const index = cat.channels.findIndex(c => c.id === channel.id)
+          if (index !== -1) {
+            cat.channels.splice(index, 1)
+            break
+          }
+        }
+      }
+      
+      // 如果删除的是当前激活的频道，跳转到第一个频道
+      if (activeChannelId.value === channel.id) {
+        const firstChannel = allChannels.value[0]
+        if (firstChannel) {
+          onChannelClick(firstChannel.id)
+        } else {
+          globalStore.currentChannelId = null
+          const sid2 = globalStore.currentServerId
+          if (sid2) router.push(`/servers/${sid2}`)
+        }
+      }
+    } catch (error: any) {
+      console.error('删除频道错误:', error)
+      // 如果错误是 JSON 解析错误，可能是 204 响应导致的，仍然视为成功
+      if (error?.message?.includes('Unexpected end of JSON') || 
+          error?.message?.includes('JSON')) {
+        ElMessage.success(`频道「${channel.name}」已删除`)
+        // 手动移除
+        const detail = serverStore.currentDetail
+        if (detail) {
+          for (const cat of detail.categories) {
+            const index = cat.channels.findIndex(c => c.id === channel.id)
+            if (index !== -1) {
+              cat.channels.splice(index, 1)
+              break
+            }
+          }
+        }
+        if (activeChannelId.value === channel.id) {
+          const firstChannel = allChannels.value[0]
+          if (firstChannel) {
+            onChannelClick(firstChannel.id)
+          } else {
+            globalStore.currentChannelId = null
+            const sid2 = globalStore.currentServerId
+            if (sid2) router.push(`/servers/${sid2}`)
+          }
+        }
+      } else {
+        ElMessage.error('删除频道失败，请重试')
+      }
+    }
+  }).catch(() => {
+    // 用户取消删除
+  })
+}
 </script>
+
 <template>
   <aside class="channel-panel">
     <!-- 服务器名称 + 下拉菜单 -->
@@ -157,9 +330,12 @@ async function createChannel() {
             v-for="ch in cat.channels"
             :key="ch.id"
             :channel="ch"
+            :server-id="globalStore.currentServerId!"
             :is-active="activeChannelId === ch.id"
             :unread-count="globalStore.unreadCounts.get(ch.id) || 0"
             @click="onChannelClick"
+            @edit="handleEditChannel"
+            @delete="handleDeleteChannel"
           />
         </div>
       </template>
@@ -180,9 +356,50 @@ async function createChannel() {
       <div v-else class="create-btn" @click="showCreate = true">+ 创建频道</div>
     </div>
 
+    <!-- 编辑频道弹窗 -->
+    <el-dialog
+      v-model="editDialogVisible"
+      title="编辑频道"
+      width="500px"
+      :close-on-click-modal="false"
+    >
+      <el-form
+        ref="editFormRef"
+        :model="editForm"
+        :rules="editRules"
+        label-position="top"
+      >
+        <el-form-item label="频道名称" prop="name">
+          <el-input
+            v-model="editForm.name"
+            placeholder="请输入频道名称"
+            maxlength="32"
+            show-word-limit
+          />
+        </el-form-item>
+        <el-form-item label="主题" prop="topic">
+          <el-input
+            v-model="editForm.topic"
+            placeholder="请输入频道主题（可选）"
+            maxlength="256"
+            show-word-limit
+            type="textarea"
+            :rows="3"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="editDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="editLoading" @click="submitEdit">
+          保存
+        </el-button>
+      </template>
+    </el-dialog>
+
     <UserPanel />
   </aside>
 </template>
+
 <style lang="scss" scoped>
 .channel-panel {
   display: flex;
