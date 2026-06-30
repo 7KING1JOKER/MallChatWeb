@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch, onMounted } from 'vue'
 import type { MessageVO } from '@/services/types'
 import { useUserStore } from '@/stores/user'
 import { useUserInfo } from '@/hooks/useCached'
 import { useChatStore } from '@/stores/chat'
 import { useGlobalStore } from '@/stores/global'
+import { useServerStore } from '@/stores/server'
 import { formatTimestamp } from '@/utils/computedTime'
 import renderReplyContent from '@/utils/renderReplyContent'
 import apis from '@/services/apis'
@@ -15,12 +16,86 @@ const props = defineProps<{ message: MessageVO }>()
 const userStore = useUserStore()
 const chatStore = useChatStore()
 const globalStore = useGlobalStore()
+const serverStore = useServerStore()
+
 const sender = useUserInfo(props.message.fromUser.id)
 const isMe = computed(() => props.message.fromUser.id === userStore.userInfo.id)
 const isEdited = computed(() => props.message.status === 2)
 const time = computed(() =>
   props.message.createTime ? formatTimestamp(new Date(props.message.createTime).getTime()) : '',
 )
+
+// 从 localStorage 读取服务器昵称
+function getCachedNickname(serverId: number, userId: number): string {
+  try {
+    const key = `server_nickname_${serverId}_${userId}`
+    return localStorage.getItem(key) || ''
+  } catch {
+    return ''
+  }
+}
+
+// 响应式昵称，用于触发更新
+const displayName = ref('')
+
+// 更新显示昵称
+function updateDisplayName() {
+  const userId = props.message.fromUser.id
+  const serverId = globalStore.currentServerId
+  
+  // 1. 先从 serverStore.members 中查找
+  const member = serverStore.members.find(m => m.userId === userId)
+  if (member?.serverNickname) {
+    displayName.value = member.serverNickname
+    return
+  }
+  
+  // 2. 从 localStorage 缓存中读取
+  if (serverId) {
+    const cached = getCachedNickname(serverId, userId)
+    if (cached) {
+      displayName.value = cached
+      return
+    }
+  }
+  
+  // 3. 使用全局昵称
+  displayName.value = sender.nickname || props.message.fromUser.nickname
+}
+
+// 监听 store 变化
+watch(
+  () => serverStore.members,
+  () => {
+    updateDisplayName()
+  },
+  { deep: true }
+)
+
+// 监听 message 变化
+watch(
+  () => props.message,
+  () => {
+    updateDisplayName()
+  },
+  { immediate: true }
+)
+
+// 定时刷新昵称（每3秒检查一次缓存变化）
+let timer: any = null
+onMounted(() => {
+  updateDisplayName()
+  timer = setInterval(() => {
+    updateDisplayName()
+  }, 3000)
+})
+
+// 清理定时器
+import { onBeforeUnmount } from 'vue'
+onBeforeUnmount(() => {
+  if (timer) clearInterval(timer)
+})
+
 const replyMsg = computed(() =>
   props.message.replyMsgId && globalStore.currentChannelId
     ? chatStore
@@ -54,6 +129,7 @@ async function toggleReaction(emoji: string) {
   }
 }
 </script>
+
 <template>
   <div :class="['msg-item', { 'is-me': isMe }]">
     <div v-if="(message as any).timeBlock" class="time-block">{{ (message as any).timeBlock }}</div>
@@ -61,7 +137,7 @@ async function toggleReaction(emoji: string) {
       <el-avatar :size="36" :src="sender.avatar" class="msg-avatar" />
       <div class="msg-body">
         <div class="msg-header">
-          <span class="msg-nickname">{{ sender.nickname || message.fromUser.nickname }}</span>
+          <span class="msg-nickname">{{ displayName }}</span>
           <span class="msg-time">{{ time }}</span>
           <span v-if="isEdited" class="edited-tag">(已编辑)</span>
         </div>
@@ -87,6 +163,7 @@ async function toggleReaction(emoji: string) {
     <ContextMenu :message="message" />
   </div>
 </template>
+
 <style lang="scss" scoped>
 .msg-item {
   padding: 2px 16px;
