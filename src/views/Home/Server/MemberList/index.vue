@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { useServerStore } from '@/stores/server'
 import { useGlobalStore } from '@/stores/global'
 import { useUserStore } from '@/stores/user'
@@ -24,6 +25,7 @@ onMounted(async () => {
     await serverStore.getServerDetail(sid)
   }
   await loadMembers()
+  await serverStore.getRoles(serverId.value)
 })
 
 async function loadMembers() {
@@ -54,7 +56,6 @@ const filteredMembers = computed(() => {
   )
 })
 
-// 按角色排序：管理员在前，在线优先
 const sortedMembers = computed(() => {
   const list = [...filteredMembers.value]
   return list.sort((a, b) => {
@@ -67,19 +68,71 @@ const sortedMembers = computed(() => {
   })
 })
 
-const isOwner = computed(() => serverStore.currentServer?.ownerId === userStore.userInfo.id)
+const isOwner = computed(() => serverStore.currentServer?.ownerId === userStore.userInfo?.id)
 const canKick = computed(() => serverStore.hasPermission(PermissionBit.KICK_MEMBERS))
+const canManageRoles = computed(() => 
+  isOwner.value || serverStore.hasPermission(PermissionBit.MANAGE_ROLES)
+)
 
 async function kickMember(userId: number) {
   try {
     await apis.leaveOrKick(serverId.value, userId).send()
     serverStore.removeMember(userId)
+    ElMessage.success('已踢出成员')
   } catch {
-    /* ignore */
+    ElMessage.error('踢出失败')
   }
 }
 
-// 角色分配弹窗
+// ============ 移除角色 ============
+async function removeRole(member: MemberVO, roleId: number) {
+  const role = member.roles?.find(r => r.id === roleId)
+  if (!role) return
+
+  if (role.name === '@everyone') {
+    ElMessage.warning('不能移除 @everyone 角色')
+    return
+  }
+
+  const isSelf = member.userId === userStore.userInfo?.id
+  if (isSelf && member.roles.length <= 1) {
+    ElMessage.warning('不能移除自己的最后一个角色')
+    return
+  }
+
+  if (!isOwner.value && !serverStore.hasPermission(PermissionBit.MANAGE_ROLES)) {
+    ElMessage.warning('你没有权限管理角色')
+    return
+  }
+
+  try {
+    await ElMessageBox.confirm(
+      `确定移除 ${member.serverNickname || member.nickname} 的「${role.name}」角色？`,
+      '移除角色',
+      {
+        confirmButtonText: '确定移除',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+
+    await apis.removeRole(serverId.value, member.userId, role.id).send()
+    
+    const target = serverStore.members.find(m => m.userId === member.userId)
+    if (target) {
+      target.roles = target.roles.filter(r => r.id !== role.id)
+    }
+    
+    ElMessage.success(`已移除「${role.name}」角色`)
+  } catch (error: any) {
+    if (error !== 'cancel') {
+      const errMsg = error?.data?.message || error?.message || '移除角色失败'
+      ElMessage.error(errMsg)
+    }
+  }
+}
+
+// ============ 角色分配弹窗 ============
 const roleModalVisible = ref(false)
 const roleTarget = ref<MemberVO | null>(null)
 
@@ -94,15 +147,11 @@ async function assignRole(roleId: number) {
     await apis.assignRoles(serverId.value, roleTarget.value.userId, { roleIds: [roleId] }).send()
     await serverStore.getMembers(serverId.value, true)
     roleModalVisible.value = false
+    ElMessage.success('角色已分配')
   } catch {
-    /* ignore */
+    ElMessage.error('分配失败')
   }
 }
-
-// 加载服务器角色列表
-onMounted(async () => {
-  await serverStore.getRoles(serverId.value)
-})
 </script>
 
 <template>
@@ -150,7 +199,37 @@ onMounted(async () => {
           </div>
         </div>
         <div v-if="isOwner || (canKick && serverStore.currentServer?.ownerId !== m.userId)" class="member-actions">
-          <el-button v-if="isOwner" size="small" text @click="openRoleModal(m)">角色</el-button>
+          <!-- 角色管理下拉菜单 -->
+          <el-dropdown v-if="canManageRoles && m.roles && m.roles.length > 0" @command="(roleId: number) => removeRole(m, roleId)">
+            <el-button size="small" text>
+              移除角色 <el-icon><IEpArrowDown /></el-icon>
+            </el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item disabled style="color: var(--font-secondary); font-size: 12px;">
+                  选择要移除的角色
+                </el-dropdown-item>
+                <el-dropdown-item
+                  v-for="r in m.roles"
+                  :key="r.id"
+                  :command="r.id"
+                  :disabled="r.name === '@everyone'"
+                  :style="{ color: r.name === '@everyone' ? 'var(--font-secondary)' : '#f56c6c' }"
+                >
+                  <span
+                    class="role-color-dot-small"
+                    :style="{ backgroundColor: r.color || '#5865f2' }"
+                  ></span>
+                  {{ r.name }}
+                  <span v-if="r.name === '@everyone'" style="font-size: 11px; color: var(--font-secondary); margin-left: 4px;">
+                    (不可移除)
+                  </span>
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+
+          <el-button v-if="isOwner" size="small" text @click="openRoleModal(m)">分配角色</el-button>
           <el-button
             v-if="
               (canKick || isOwner) && serverStore.currentServer?.ownerId !== m.userId
@@ -322,5 +401,14 @@ onMounted(async () => {
   width: 12px;
   height: 12px;
   border-radius: 50%;
+}
+
+.role-color-dot-small {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 6px;
+  border-radius: 50%;
+  vertical-align: middle;
 }
 </style>
