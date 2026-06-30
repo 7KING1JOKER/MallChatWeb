@@ -2,10 +2,12 @@
 import { reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
+import { useServerStore } from '@/stores/server'
 import { useWsLoginStore } from '@/stores/ws'
 import apis from '@/services/apis'
 
 const userStore = useUserStore()
+const serverStore = useServerStore()
 const wsLoginStore = useWsLoginStore()
 
 const visible = ref(false)
@@ -47,6 +49,8 @@ async function handleLogin() {
       wsLoginStore.showLogin = false
       form.username = ''
       form.password = ''
+      // 登录后加载服务器列表
+      serverStore.getMyServers()
     }
   } catch (e: any) {
     ElMessage.error(e?.message || '登录失败，请检查后端是否启动')

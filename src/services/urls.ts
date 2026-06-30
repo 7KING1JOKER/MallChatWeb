@@ -107,4 +107,5 @@ export default {
 
   // Search
   searchMessages: (serverId: number) => `${prefix}/api/v1/servers/${serverId}/search`,
+  reindexMessages: (serverId: number) => `${prefix}/api/v1/servers/${serverId}/search/reindex`,
 }

@@ -129,6 +129,33 @@ export const useChatStore = defineStore('chat', () => {
     }
   }
 
+  /** 用 API 返回的完整 ReactionVO[] 替换消息的 reactions（用于 Reaction 操作后立即更新） */
+  function setMessageReactions(msgId: number, reactions: ReactionVO[]) {
+    for (const [, map] of messageMap) {
+      const msg = map.get(msgId)
+      if (msg) {
+        // 用 splice 替换数组内容（保持响应式引用），避免直接赋值破坏 Vue 依赖追踪
+        if (!msg.reactions) {
+          msg.reactions = []
+        }
+        msg.reactions.splice(0, msg.reactions.length, ...reactions)
+        return
+      }
+    }
+  }
+
+  /** 从消息中移除指定 emoji 的 Reaction（用于 toggle 回退） */
+  function removeReactionEmoji(msgId: number, emoji: string) {
+    for (const [, map] of messageMap) {
+      const msg = map.get(msgId)
+      if (msg?.reactions) {
+        const idx = msg.reactions.findIndex((r) => r.emoji === emoji)
+        if (idx !== -1) msg.reactions.splice(idx, 1)
+        return
+      }
+    }
+  }
+
   async function sendMessage(data: {
     channelId: number
     content: string
@@ -183,6 +210,8 @@ export const useChatStore = defineStore('chat', () => {
     deleteMessage,
     setMessageThread,
     updateReaction,
+    setMessageReactions,
+    removeReactionEmoji,
     setReply,
     clearReply,
     getMessages,

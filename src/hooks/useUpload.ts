@@ -102,17 +102,22 @@ export const useUpload = () => {
       await new Promise<void>((resolve, reject) => {
         const xhr = new XMLHttpRequest()
         xhr.open('PUT', pre.uploadUrl, true)
-        xhr.setRequestHeader('Content-Type', file.type)
+        // 不手动设置 Content-Type，让浏览器自动处理
+        // MinIO presigned URL 签名中 SignedHeaders=host，不校验 Content-Type
         xhr.upload.onprogress = (e) => {
           progress.value = Math.round((e.loaded / e.total) * 100)
         }
         xhr.onload = () => {
           isUploading.value = false
-          xhr.status === 200 ? resolve() : reject(new Error(`HTTP ${xhr.status}`))
+          if (xhr.status === 200) {
+            resolve()
+          } else {
+            reject(new Error(`MinIO 上传失败 HTTP ${xhr.status}。请检查：1) MinIO 服务是否运行 2) MinIO CORS 是否已配置允许跨域 PUT 请求 3) 预签名 URL 是否已过期`))
+          }
         }
         xhr.onerror = () => {
           isUploading.value = false
-          reject(new Error('Network error'))
+          reject(new Error('网络错误：无法连接到 MinIO。请确认 MinIO 服务已启动且 CORS 已配置'))
         }
         xhr.send(file)
       })

@@ -45,9 +45,19 @@ async function createThread() {
 
 async function toggleReaction(emoji: string) {
   try {
-    await apis.addReaction(props.message.id, emoji).send()
+    const data = await apis.addReaction(props.message.id, emoji).send()
+    if (data) {
+      // 只更新被 toggle 的这个 emoji，不影响其他 emoji
+      const target = data.find((r: { emoji: string }) => r.emoji === emoji)
+      if (target) {
+        chatStore.updateReaction(props.message.id, target)
+      } else {
+        // emoji 不在返回列表中 → 已被 toggle 移除
+        chatStore.removeReactionEmoji(props.message.id, emoji)
+      }
+    }
   } catch {
-    await apis.removeReaction(props.message.id, emoji).send()
+    /* ignore — WS 推送会同步 */
   }
 }
 

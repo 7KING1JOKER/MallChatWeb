@@ -52,6 +52,23 @@ export const useServerStore = defineStore('server', () => {
   async function deleteServer(serverId: number) {
     await apis.deleteServer(serverId).send()
     servers.value = servers.value.filter((s) => s.id !== serverId)
+    // 如果删除的是当前服务器，清除当前状态
+    if (currentServer.value?.id === serverId) {
+      currentServer.value = null
+      currentDetail.value = null
+    }
+  }
+
+  /** 重置所有服务器状态（退出登录时调用） */
+  function reset() {
+    servers.value = []
+    currentServer.value = null
+    currentDetail.value = null
+    members.value = []
+    memberCursor.cursor = ''
+    memberCursor.isLast = false
+    roles.value = []
+    onlineUsers.value = new Set()
   }
 
   // ===== 成员 =====
@@ -170,5 +187,6 @@ export const useServerStore = defineStore('server', () => {
     updateChannel,
     removeChannelFromTree,
     addChannelToTree,
+    reset,
   }
 })

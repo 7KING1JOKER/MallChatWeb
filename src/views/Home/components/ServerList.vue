@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import { ElMessage } from 'element-plus'
 import { useServerStore } from '@/stores/server'
 import { useGlobalStore } from '@/stores/global'
+import { useUserStore } from '@/stores/user'
 import { useRouter } from 'vue-router'
 import ServerIcon from './ServerIcon.vue'
 import CreateServerModal from './CreateServerModal.vue'
@@ -9,19 +11,32 @@ import CreateServerModal from './CreateServerModal.vue'
 const router = useRouter()
 const serverStore = useServerStore()
 const globalStore = useGlobalStore()
+const userStore = useUserStore()
 const createModalRef = ref<InstanceType<typeof CreateServerModal>>()
 
 onMounted(() => {
-  serverStore.getMyServers()
+  if (userStore.isSign) serverStore.getMyServers()
 })
+
+// 登录后自动加载服务器列表
+watch(
+  () => userStore.isSign,
+  (isSign) => {
+    if (isSign) serverStore.getMyServers()
+  },
+)
 
 const servers = computed(() => serverStore.servers)
 const activeServerId = computed(() => globalStore.currentServerId)
 
 async function onServerClick(serverId: number) {
-  await globalStore.enterServer(serverId)
-  await serverStore.getServerDetail(serverId)
-  // 自动导航到第一个频道
+  try {
+    await globalStore.enterServer(serverId)
+    await serverStore.getServerDetail(serverId)
+  } catch {
+    ElMessage.error('加载服务器失败，请重试')
+  }
+  // 无论数据加载成功与否，都要导航到目标服务器页面
   const cats = serverStore.currentDetail?.categories || []
   const allChannels: (typeof cats)[number]['channels'] = []
   for (const cat of cats) {
@@ -31,7 +46,7 @@ async function onServerClick(serverId: number) {
     globalStore.enterChannel(allChannels[0].id)
     router.push(`/servers/${serverId}/channels/${allChannels[0].id}`)
   } else {
-    router.push('/')
+    router.push(`/servers/${serverId}/channels/`)
   }
 }
 </script>

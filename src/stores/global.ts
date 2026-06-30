@@ -56,6 +56,20 @@ export const useGlobalStore = defineStore('global', () => {
     }
   }
 
+  /** 重置服务器/频道/Thread 选中状态（退出登录或删除服务器时调用） */
+  function resetServerState() {
+    if (currentChannelId.value) {
+      wsIns.unsubscribeChannel([currentChannelId.value])
+    }
+    if (currentThreadId.value) {
+      wsIns.unsubscribeThread(currentThreadId.value)
+    }
+    currentServerId.value = null
+    currentChannelId.value = null
+    currentThreadId.value = null
+    unreadCounts.clear()
+  }
+
   return {
     currentServerId,
     currentChannelId,
@@ -66,5 +80,6 @@ export const useGlobalStore = defineStore('global', () => {
     enterThread,
     leaveThread,
     loadUnread,
+    resetServerState,
   }
 })

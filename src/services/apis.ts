@@ -229,4 +229,7 @@ export default {
   /** 消息搜索 */
   searchMessages: (serverId: number, params: SearchParams) =>
     getRequest<CursorPage<MessageVO>>(urls.searchMessages(serverId), { params }),
+  /** 重建 ES 搜索索引（从 MySQL 全量同步） */
+  reindexMessages: (serverId: number) =>
+    postRequest<{ indexedMessages: number }>(urls.reindexMessages(serverId)),
 }

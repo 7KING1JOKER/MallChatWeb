@@ -216,11 +216,12 @@ class WS {
       case WsResponseMessageType.REACTION_ADD:
       case WsResponseMessageType.REACTION_REMOVE: {
         const data = params.data as ReactionPayload
+        const isAdd = (params.type as WsResponseMessageType) === WsResponseMessageType.REACTION_ADD
         chatStore.updateReaction(data.messageId, {
           emoji: data.e,
           count: data.count,
           userIds: [],
-          reacted: true,
+          reacted: isAdd && data.uid === userStore.userInfo.id,
         })
         break
       }

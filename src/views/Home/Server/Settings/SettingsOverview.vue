@@ -53,17 +53,45 @@ async function save() {
 }
 
 async function deleteServer() {
+  let confirmed = false
   try {
     await ElMessageBox.confirm('删除后所有数据将无法恢复，确定要删除此服务器？', '删除服务器', {
       type: 'error',
       confirmButtonText: '删除',
       cancelButtonText: '取消',
     })
+    confirmed = true
+  } catch {
+    /* user cancelled */
+    return
+  }
+  if (!confirmed) return
+
+  try {
     await serverStore.deleteServer(serverId.value)
     ElMessage.success('服务器已删除')
-    router.push('/')
-  } catch {
-    /* cancelled */
+    // 删除后：如果有其他服务器则跳转到第一个，否则回到首页并清空状态
+    const remaining = serverStore.servers
+    if (remaining.length > 0) {
+      await globalStore.enterServer(remaining[0].id)
+      await serverStore.getServerDetail(remaining[0].id)
+      const cats = serverStore.currentDetail?.categories || []
+      const allChannels: { id: number }[] = []
+      for (const cat of cats) {
+        allChannels.push(...cat.channels)
+      }
+      if (allChannels.length) {
+        globalStore.enterChannel(allChannels[0].id)
+        router.push(`/servers/${remaining[0].id}/channels/${allChannels[0].id}`)
+      } else {
+        router.push(`/servers/${remaining[0].id}/channels/`)
+      }
+    } else {
+      globalStore.resetServerState()
+      router.push('/')
+    }
+  } catch (e: any) {
+    ElMessage.error('删除后导航失败：' + (e?.message || '未知错误'))
   }
 }
 </script>

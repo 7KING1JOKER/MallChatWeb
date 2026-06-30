@@ -40,9 +40,17 @@ const replyContent = computed(() =>
 
 async function toggleReaction(emoji: string) {
   try {
-    await apis.addReaction(props.message.id, emoji).send()
+    const data = await apis.addReaction(props.message.id, emoji).send()
+    if (data) {
+      const target = data.find((r: { emoji: string }) => r.emoji === emoji)
+      if (target) {
+        chatStore.updateReaction(props.message.id, target)
+      } else {
+        chatStore.removeReactionEmoji(props.message.id, emoji)
+      }
+    }
   } catch {
-    await apis.removeReaction(props.message.id, emoji).send()
+    /* ignore — WS 推送会同步 */
   }
 }
 </script>

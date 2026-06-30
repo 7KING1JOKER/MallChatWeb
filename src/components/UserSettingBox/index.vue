@@ -3,6 +3,8 @@ import { computed, reactive, watchEffect } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Select, CloseBold, EditPen } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/user'
+import { useServerStore } from '@/stores/server'
+import { useGlobalStore } from '@/stores/global'
 import { SexEnum } from '@/enums'
 import apis from '@/services/apis'
 import { judgeClient } from '@/utils/detectDevice'
@@ -36,6 +38,11 @@ function logout() {
   userStore.userInfo = {}
   localStorage.removeItem('TOKEN')
   localStorage.removeItem('USER_INFO')
+  // 清除服务器和全局状态，避免侧边栏残留
+  const serverStore = useServerStore()
+  const globalStore = useGlobalStore()
+  serverStore.reset()
+  globalStore.resetServerState()
   value.value = false
   ElMessage.success('已退出登录')
 }
