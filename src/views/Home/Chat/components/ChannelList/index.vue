@@ -146,7 +146,6 @@ async function submitEdit() {
   const sid = globalStore.currentServerId
   if (!sid) return
 
-  // 表单验证
   try {
     await editFormRef.value?.validate()
   } catch {
@@ -155,7 +154,6 @@ async function submitEdit() {
 
   editLoading.value = true
   try {
-    // 构建请求数据，只传有值的字段
     const data: { name?: string; topic?: string } = {}
     if (editForm.value.name.trim() !== editingChannel.value.name) {
       data.name = editForm.value.name.trim()
@@ -164,7 +162,6 @@ async function submitEdit() {
       data.topic = editForm.value.topic.trim()
     }
     
-    // 如果没有任何修改，直接关闭弹窗
     if (Object.keys(data).length === 0) {
       ElMessage.info('没有修改任何内容')
       editDialogVisible.value = false
@@ -179,8 +176,6 @@ async function submitEdit() {
 
     ElMessage.success('频道已更新')
     editDialogVisible.value = false
-    
-    // 刷新频道列表
     await serverStore.getServerDetail(sid)
   } catch (error: any) {
     console.error('编辑频道错误:', error)
@@ -219,12 +214,10 @@ function handleDeleteChannel(channel: ChannelVO) {
     }
 
     try {
-      // 发送删除请求，忽略响应（204 No Content）
       await apis.deleteChannel(sid, channel.id).send()
       
       ElMessage.success(`频道「${channel.name}」已删除`)
       
-      // 直接从本地数据中移除
       const detail = serverStore.currentDetail
       if (detail) {
         for (const cat of detail.categories) {
@@ -236,7 +229,6 @@ function handleDeleteChannel(channel: ChannelVO) {
         }
       }
       
-      // 如果删除的是当前激活的频道，跳转到第一个频道
       if (activeChannelId.value === channel.id) {
         const firstChannel = allChannels.value[0]
         if (firstChannel) {
@@ -249,38 +241,102 @@ function handleDeleteChannel(channel: ChannelVO) {
       }
     } catch (error: any) {
       console.error('删除频道错误:', error)
-      // 如果错误是 JSON 解析错误，可能是 204 响应导致的，仍然视为成功
-      if (error?.message?.includes('Unexpected end of JSON') || 
-          error?.message?.includes('JSON')) {
-        ElMessage.success(`频道「${channel.name}」已删除`)
-        // 手动移除
-        const detail = serverStore.currentDetail
-        if (detail) {
-          for (const cat of detail.categories) {
-            const index = cat.channels.findIndex(c => c.id === channel.id)
-            if (index !== -1) {
-              cat.channels.splice(index, 1)
-              break
-            }
-          }
-        }
-        if (activeChannelId.value === channel.id) {
-          const firstChannel = allChannels.value[0]
-          if (firstChannel) {
-            onChannelClick(firstChannel.id)
-          } else {
-            globalStore.currentChannelId = null
-            const sid2 = globalStore.currentServerId
-            if (sid2) router.push(`/servers/${sid2}`)
-          }
-        }
-      } else {
-        ElMessage.error('删除频道失败，请重试')
-      }
+      ElMessage.error('删除频道失败，请重试')
     }
-  }).catch(() => {
-    // 用户取消删除
-  })
+  }).catch(() => {})
+}
+
+// ============ 分类重命名 ============
+const renameDialogVisible = ref(false)
+const renameLoading = ref(false)
+const renamingCategory = ref<any>(null)
+const renameFormRef = ref()
+const renameForm = ref({ name: '' })
+
+const renameRules = {
+  name: [
+    { required: true, message: '请输入分类名称', trigger: 'blur' },
+    { min: 1, max: 16, message: '分类名称长度为 1-16 个字符', trigger: 'blur' }
+  ]
+}
+
+function handleRenameCategory(category: any) {
+  renamingCategory.value = category
+  renameForm.value.name = category.name
+  renameDialogVisible.value = true
+}
+
+async function submitRename() {
+  if (!renamingCategory.value) return
+  const sid = globalStore.currentServerId
+  if (!sid) return
+
+  try {
+    await renameFormRef.value?.validate()
+  } catch {
+    return
+  }
+
+  renameLoading.value = true
+  try {
+    await apis.updateCategory(sid, renamingCategory.value.id, {
+      name: renameForm.value.name.trim()
+    }).send()
+
+    ElMessage.success('分类已重命名')
+    renameDialogVisible.value = false
+    await serverStore.getServerDetail(sid)
+  } catch (error: any) {
+    console.error('重命名分类错误:', error)
+    const errData = error?.data || error?.response?.data
+    const errMsg = errData?.message || error?.message || '重命名失败'
+    ElMessage.error(errMsg)
+  } finally {
+    renameLoading.value = false
+  }
+}
+
+// ============ 删除分类 ============
+function handleDeleteCategory(category: any) {
+  // 检查分类下是否有频道
+  if (category.channels && category.channels.length > 0) {
+    ElMessage.warning('该分类下还有频道，无法删除')
+    return
+  }
+
+  ElMessageBox.confirm(
+    `确定删除分类「${category.name}」？`,
+    '警告',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+      confirmButtonClass: 'el-button--danger'
+    }
+  ).then(async () => {
+    const sid = globalStore.currentServerId
+    if (!sid) return
+
+    try {
+      await apis.deleteCategory(sid, category.id).send()
+      
+      ElMessage.success(`分类「${category.name}」已删除`)
+      
+      // 直接从本地移除分类
+      const detail = serverStore.currentDetail
+      if (detail) {
+        const index = detail.categories.findIndex(c => c.id === category.id)
+        if (index !== -1) {
+          detail.categories.splice(index, 1)
+        }
+      }
+    } catch (error: any) {
+      console.error('删除分类错误:', error)
+      const errData = error?.data || error?.response?.data
+      const errMsg = errData?.message || error?.message || '删除失败'
+      ElMessage.error(errMsg)
+    }
+  }).catch(() => {})
 }
 </script>
 
@@ -318,11 +374,38 @@ function handleDeleteChannel(channel: ChannelVO) {
       <div v-if="!allChannels.length" class="empty-hint">暂无频道，请创建一个</div>
       <template v-for="cat in categories" :key="cat.id">
         <!-- 分类标题（可折叠） -->
-        <div class="category-header-item" @click="toggleCategory(cat.id)">
-          <el-icon :class="['arrow', { rotated: !collapsedMap.get(cat.id) }]">
-            <IEpArrowRight />
-          </el-icon>
-          <span class="category-name">{{ cat.name }}</span>
+        <div class="category-header-item">
+          <div class="category-left" @click="toggleCategory(cat.id)">
+            <el-icon :class="['arrow', { rotated: !collapsedMap.get(cat.id) }]">
+              <IEpArrowRight />
+            </el-icon>
+            <span class="category-name">{{ cat.name }}</span>
+          </div>
+          <!-- 分类操作菜单（hover 显示） -->
+          <el-dropdown
+            trigger="click"
+            placement="bottom-end"
+            class="category-menu"
+          >
+            <span class="category-more" @click.stop>⋯</span>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item @click="handleRenameCategory(cat)">
+                  📝 重命名
+                </el-dropdown-item>
+                <el-dropdown-item 
+                  @click="handleDeleteCategory(cat)"
+                  :disabled="cat.channels && cat.channels.length > 0"
+                  :style="{ color: cat.channels && cat.channels.length > 0 ? '#8e9297' : '#f56c6c' }"
+                >
+                  🗑 删除分类
+                  <span v-if="cat.channels && cat.channels.length > 0" style="font-size: 11px; color: #8e9297; margin-left: 4px;">
+                    (有 {{ cat.channels.length }} 个频道)
+                  </span>
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </div>
         <!-- 分类下的频道列表 -->
         <div v-if="!collapsedMap.get(cat.id)" class="category-channels">
@@ -391,6 +474,36 @@ function handleDeleteChannel(channel: ChannelVO) {
       <template #footer>
         <el-button @click="editDialogVisible = false">取消</el-button>
         <el-button type="primary" :loading="editLoading" @click="submitEdit">
+          保存
+        </el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 重命名分类弹窗 -->
+    <el-dialog
+      v-model="renameDialogVisible"
+      title="重命名分类"
+      width="400px"
+      :close-on-click-modal="false"
+    >
+      <el-form
+        ref="renameFormRef"
+        :model="renameForm"
+        :rules="renameRules"
+        label-position="top"
+      >
+        <el-form-item label="分类名称" prop="name">
+          <el-input
+            v-model="renameForm.name"
+            placeholder="请输入分类名称"
+            maxlength="16"
+            show-word-limit
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="renameDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="renameLoading" @click="submitRename">
           保存
         </el-button>
       </template>
@@ -507,19 +620,47 @@ function handleDeleteChannel(channel: ChannelVO) {
 
 .category-header-item {
   display: flex;
-  gap: 4px;
   align-items: center;
+  justify-content: space-between;
   padding: 10px 12px 4px;
   font-size: 12px;
   color: var(--font-secondary, #949ba4);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  cursor: pointer;
+  cursor: default;
   user-select: none;
+
+  &:hover .category-more {
+    opacity: 1;
+  }
+}
+
+.category-left {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.category-more {
+  flex-shrink: 0;
+  padding: 0 4px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--font-secondary);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s;
 
   &:hover {
     color: var(--font-main);
   }
+}
+
+.category-menu {
+  flex-shrink: 0;
 }
 
 .arrow {
