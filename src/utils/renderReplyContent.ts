@@ -12,6 +12,8 @@ const renderReplyContent = (nickname?: string, msgType?: number, content?: strin
       return `${nickname || ''}: ${MSG_REPLY_TEXT_MAP[MsgEnum.FILE]}`
     case MsgEnum.SOUND:
       return `${nickname || ''}: ${MSG_REPLY_TEXT_MAP[MsgEnum.SOUND]}`
+    case MsgEnum.EMOJI:
+      return `${nickname || ''}: ${MSG_REPLY_TEXT_MAP[MsgEnum.EMOJI]}`
     default:
       return ''
   }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import apis from '@/services/apis'
 import type { MessageVO } from '@/services/types'
 import { useUserStore } from '@/stores/user'
@@ -47,12 +47,10 @@ async function toggleReaction(emoji: string) {
   try {
     const data = await apis.addReaction(props.message.id, emoji).send()
     if (data) {
-      // 只更新被 toggle 的这个 emoji，不影响其他 emoji
       const target = data.find((r: { emoji: string }) => r.emoji === emoji)
       if (target) {
         chatStore.updateReaction(props.message.id, target)
       } else {
-        // emoji 不在返回列表中 → 已被 toggle 移除
         chatStore.removeReactionEmoji(props.message.id, emoji)
       }
     }
@@ -61,7 +59,31 @@ async function toggleReaction(emoji: string) {
   }
 }
 
-const emojis = ['👍', '❤️', '😂', '🎉', '🔥', '👀']
+const quickEmojis = ['👍','❤️','😂','🎉','🔥','👀']
+
+// ── Mini emoji picker for reactions ──
+const showReactionPicker = ref(false)
+
+const reactionEmojis = [
+  '😀','😃','😄','😁','😆','😅','🤣','😂','🙂','😊','😇','🥰','😍','🤩','😘','😗',
+  '😋','😛','😜','🤪','😝','🤑','🤗','🤭','🤫','🤔','🤐','🤨','😐','😑','😶','😏',
+  '😒','🙄','😬','🤥','😌','😔','😪','🤤','😴','😷','🤒','🤕','🤢','🤮','🥵','🥶',
+  '😵','🤯','🤠','🥳','🥸','😎','🤓','🧐','😕','😟','🙁','😮','😯','😲','😳',
+  '🥺','😦','😧','😨','😰','😥','😢','😭','😱','😖','😣','😞','😓','😩','😫','🥱',
+  '😤','😡','😠','🤬','👋','🤚','🖐️','👍','👎','👏','🙌','🤝','💪',
+  '❤️','🧡','💛','💚','💙','💜','🖤','🤍','💔','💕','💞','💓','💗','💖','💘',
+  '🔥','⭐','🌟','✨','💫','💯','✅','❌','🎉','🎊','🎈','🏆','💡','🚀',
+  '💩','🤡','👻','👽','💀','☠️','🐵','🐶','🐱','🦊','🐻','🐼',
+]
+
+function toggleReactionPicker() {
+  showReactionPicker.value = !showReactionPicker.value
+}
+
+function onPickReaction(emoji: string) {
+  toggleReaction(emoji)
+  showReactionPicker.value = false
+}
 
 const emit = defineEmits<{ edit: [msgId: number] }>()
 </script>
@@ -70,12 +92,29 @@ const emit = defineEmits<{ edit: [msgId: number] }>()
   <div class="context-menu">
     <div class="emoji-row">
       <span
-        v-for="e in emojis"
+        v-for="e in quickEmojis"
         :key="e"
         class="menu-emoji"
         @click="toggleReaction(e)"
       >{{ e }}</span>
+      <!-- Reaction picker toggle -->
+      <span class="menu-emoji picker-toggle" title="更多表情" @click="toggleReactionPicker">
+        <span class="picker-toggle-icon">+</span>
+      </span>
     </div>
+
+    <!-- Mini emoji picker popover -->
+    <div v-if="showReactionPicker" class="reaction-picker-popover">
+      <div class="reaction-picker-grid">
+        <span
+          v-for="emoji in reactionEmojis"
+          :key="emoji"
+          class="reaction-picker-emoji"
+          @click="onPickReaction(emoji)"
+        >{{ emoji }}</span>
+      </div>
+    </div>
+
     <div class="menu-sep" />
     <div class="menu-item" @click="replyTo()">
       <span class="menu-icon">↩</span> 回复
@@ -132,6 +171,51 @@ const emit = defineEmits<{ edit: [msgId: number] }>()
   &:hover {
     background-color: var(--bg-hover, rgba(255, 255, 255, 8%));
     transform: scale(1.2);
+  }
+}
+
+.picker-toggle {
+  margin-left: 2px;
+  border: 1px dashed var(--divider-color, rgba(255, 255, 255, 15%));
+}
+
+.picker-toggle-icon {
+  font-size: 16px;
+  font-weight: 300;
+  color: var(--font-secondary);
+}
+
+// ── Reaction Picker Popover ──
+.reaction-picker-popover {
+  padding: 6px;
+  margin-top: 2px;
+  max-height: 180px;
+  overflow-y: auto;
+  background: var(--bg-card, rgba(255, 255, 255, 3%));
+  border: 1px solid var(--divider-color, rgba(255, 255, 255, 6%));
+  border-radius: 6px;
+}
+
+.reaction-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 2px;
+}
+
+.reaction-picker-emoji {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  font-size: 17px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.1s, transform 0.1s;
+
+  &:hover {
+    background: var(--bg-hover, rgba(255, 255, 255, 8%));
+    transform: scale(1.25);
   }
 }
 

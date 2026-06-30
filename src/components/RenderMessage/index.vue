@@ -6,6 +6,7 @@ import Image from './image.vue'
 import Voice from './voice.vue'
 import File from './file.vue'
 import Text from './text.vue'
+import Emoji from './emoji.vue'
 
 const props = defineProps<{ message: MessageVO }>()
 const cmp: Record<number, any> = {
@@ -14,6 +15,7 @@ const cmp: Record<number, any> = {
   [MsgEnum.IMAGE]: Image,
   [MsgEnum.FILE]: File,
   [MsgEnum.SOUND]: Voice,
+  [MsgEnum.EMOJI]: Emoji,
 }
 const comp = computed(() => cmp[props.message.msgType] || Text)
 </script>

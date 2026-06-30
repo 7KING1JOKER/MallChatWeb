@@ -38,7 +38,7 @@ export const alovaIns = createAlova({
     config.headers.Authorization = `Bearer ${computedToken.get()}`
 
     // FormData 上传不设 Content-Type，让浏览器自动生成 boundary
-    if (!(config.body instanceof FormData)) {
+    if (!(config.data instanceof FormData)) {
       config.headers['Content-Type'] = 'application/json; charset=utf-8'
     }
   },

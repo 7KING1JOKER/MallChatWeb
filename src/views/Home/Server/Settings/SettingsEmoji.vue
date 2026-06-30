@@ -23,6 +23,7 @@ onMounted(async () => {
 const uploadName = ref('')
 const uploadFile = ref<File | null>(null)
 const uploading = ref(false)
+const fileInputRef = ref<HTMLInputElement | null>(null)
 
 function onFileChange(e: Event) {
   const file = (e.target as HTMLInputElement).files?.[0]
@@ -41,7 +42,7 @@ async function doUpload() {
     uploadFile.value = null
     ElMessage.success('上传成功')
   } catch {
-    ElMessage.error('上传失败')
+    // 错误消息已由 request.ts 响应拦截器统一展示（ElMessage.error(json.errMsg)）
   } finally {
     uploading.value = false
   }
@@ -75,10 +76,8 @@ function getDownloadUrl(emojiId: number) {
           maxlength="32"
           style="width: 180px"
         />
-        <label class="file-pick">
-          <el-button size="small" as="span">选择文件</el-button>
-          <input type="file" accept="image/*" hidden @change="onFileChange" />
-        </label>
+        <input ref="fileInputRef" type="file" accept="image/*" hidden @change="onFileChange" />
+        <el-button size="small" @click="fileInputRef?.click()">选择文件</el-button>
         <span v-if="uploadFile" class="file-name">{{ uploadFile.name }}</span>
         <el-button type="primary" size="small" :loading="uploading" @click="doUpload">
           上传
