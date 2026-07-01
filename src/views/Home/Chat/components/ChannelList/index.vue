@@ -14,25 +14,26 @@ const router = useRouter()
 const serverStore = useServerStore()
 const globalStore = useGlobalStore()
 
-/** 服务器下拉菜单 */
-const showServerMenu = ref(false)
-function toggleServerMenu() {
-  showServerMenu.value = !showServerMenu.value
-}
-function goSettings() {
+/** 服务器下拉菜单 —— 已移除，改为创建分类 */
+const showCreateCategory = ref(false)
+const newCategoryName = ref('')
+const creatingCategory = ref(false)
+
+async function createCategory() {
   const sid = globalStore.currentServerId
-  if (sid) router.push(`/servers/${sid}/settings`)
-  showServerMenu.value = false
-}
-function goMembers() {
-  const sid = globalStore.currentServerId
-  if (sid) router.push(`/servers/${sid}/members`)
-  showServerMenu.value = false
-}
-function goSearch() {
-  const sid = globalStore.currentServerId
-  if (sid) router.push(`/servers/${sid}/search`)
-  showServerMenu.value = false
+  if (!sid || !newCategoryName.value.trim()) return
+  creatingCategory.value = true
+  try {
+    await apis.createCategory(sid, { name: newCategoryName.value.trim() }).send()
+    ElMessage.success('分类创建成功')
+    newCategoryName.value = ''
+    showCreateCategory.value = false
+    serverStore.getServerDetail(sid)
+  } catch {
+    ElMessage.error('创建分类失败')
+  } finally {
+    creatingCategory.value = false
+  }
 }
 
 /** 分类列表（含折叠状态） */
@@ -79,17 +80,23 @@ function toggleCategory(categoryId: number) {
 }
 
 // ============ 创建频道 ============
-const showCreate = ref(false)
+const createChannelDialog = ref(false)
 const newChannel = ref({ name: '', categoryId: 0 })
+const creatingChannel = ref(false)
+
+function openCreateChannel(catId: number) {
+  newChannel.value = { name: '', categoryId: catId }
+  createChannelDialog.value = true
+}
 
 async function createChannel() {
   const sid = globalStore.currentServerId
   if (!sid || !newChannel.value.name.trim()) return
+  creatingChannel.value = true
   try {
     const cats = categories.value
     let catId = newChannel.value.categoryId
     if (!catId && !cats.length) {
-      // 没有分类时，先创建一个默认分类
       const cat = await apis.createCategory(sid, { name: '默认分类' }).send()
       catId = cat.id
     } else if (!catId && cats.length) {
@@ -103,11 +110,13 @@ async function createChannel() {
       })
       .send()
     ElMessage.success('频道创建成功')
-    showCreate.value = false
-    newChannel.value.name = ''
+    createChannelDialog.value = false
+    newChannel.value = { name: '', categoryId: 0 }
     serverStore.getServerDetail(sid)
   } catch {
     ElMessage.error('创建失败')
+  } finally {
+    creatingChannel.value = false
   }
 }
 
@@ -342,25 +351,21 @@ function handleDeleteCategory(category: any) {
 
 <template>
   <aside class="channel-panel">
-    <!-- 服务器名称 + 下拉菜单 -->
-    <div class="server-name-bar" @click="toggleServerMenu">
+    <!-- 服务器名称 + 新建分类 -->
+    <div class="server-name-bar">
       <span class="server-name">{{ serverStore.currentServer?.name || '未选择服务器' }}</span>
-      <el-icon class="server-chevron" :class="{ rotated: showServerMenu }"><IEpArrowDown /></el-icon>
-      <div v-if="showServerMenu" class="server-dropdown" @click.stop>
-        <div class="dropdown-item" @click="goMembers">
-          <span class="dd-icon">👥</span> 成员列表
-        </div>
-        <div class="dropdown-item" @click="goSearch">
-          <span class="dd-icon">🔍</span> 搜索消息
-        </div>
-        <div class="dropdown-sep" />
-        <div class="dropdown-item" @click="goSettings">
-          <span class="dd-icon">⚙️</span> 服务器设置
-        </div>
-        <div class="dropdown-item" @click="showServerMenu = false">
-          <span class="dd-icon">✕</span> 关闭菜单
-        </div>
-      </div>
+      <span v-if="hasServer && !showCreateCategory" class="new-category-btn" @click="showCreateCategory = true">＋ 分类</span>
+      <span v-if="hasServer && showCreateCategory" class="new-category-btn" @click="showCreateCategory = false; newCategoryName = ''">✕</span>
+    </div>
+    <!-- 新建分类表单 -->
+    <div v-if="hasServer && showCreateCategory" class="create-form">
+      <el-input
+        v-model="newCategoryName"
+        size="small"
+        placeholder="分类名称"
+        @keydown.enter="createCategory"
+      />
+      <el-button size="small" type="primary" :loading="creatingCategory" @click="createCategory">创建</el-button>
     </div>
 
     <!-- 未选服务器时提示 -->
@@ -381,7 +386,7 @@ function handleDeleteCategory(category: any) {
             </el-icon>
             <span class="category-name">{{ cat.name }}</span>
           </div>
-          <!-- 分类操作菜单（hover 显示） -->
+          <!-- 分类操作菜单 -->
           <el-dropdown
             trigger="click"
             placement="bottom-end"
@@ -390,10 +395,13 @@ function handleDeleteCategory(category: any) {
             <span class="category-more" @click.stop>⋯</span>
             <template #dropdown>
               <el-dropdown-menu>
+                <el-dropdown-item @click="openCreateChannel(cat.id)">
+                  ＋ 创建频道
+                </el-dropdown-item>
                 <el-dropdown-item @click="handleRenameCategory(cat)">
                   📝 重命名
                 </el-dropdown-item>
-                <el-dropdown-item 
+                <el-dropdown-item
                   @click="handleDeleteCategory(cat)"
                   :disabled="cat.channels && cat.channels.length > 0"
                   :style="{ color: cat.channels && cat.channels.length > 0 ? '#8e9297' : '#f56c6c' }"
@@ -422,21 +430,6 @@ function handleDeleteCategory(category: any) {
           />
         </div>
       </template>
-    </div>
-
-    <!-- 创建频道（仅在有服务器时显示） -->
-    <div v-if="hasServer" class="create-channel-bar">
-      <div v-if="showCreate" class="create-form">
-        <el-input
-          v-model="newChannel.name"
-          size="small"
-          placeholder="频道名称"
-          @keydown.enter="createChannel"
-        />
-        <el-button size="small" type="primary" @click="createChannel">创建</el-button>
-        <el-button size="small" @click="showCreate = false">取消</el-button>
-      </div>
-      <div v-else class="create-btn" @click="showCreate = true">+ 创建频道</div>
     </div>
 
     <!-- 编辑频道弹窗 -->
@@ -509,6 +502,35 @@ function handleDeleteCategory(category: any) {
       </template>
     </el-dialog>
 
+    <!-- 创建频道弹窗 -->
+    <el-dialog
+      v-model="createChannelDialog"
+      title="创建频道"
+      width="420px"
+      :close-on-click-modal="false"
+    >
+      <el-form label-position="top" @submit.prevent="createChannel">
+        <el-form-item label="频道名称">
+          <el-input
+            v-model="newChannel.name"
+            placeholder="输入频道名称"
+            maxlength="32"
+            show-word-limit
+            @keydown.enter="createChannel"
+          />
+        </el-form-item>
+        <el-form-item label="所属分类">
+          <el-select v-model="newChannel.categoryId" placeholder="选择分类" style="width: 100%">
+            <el-option v-for="cat in categories" :key="cat.id" :label="cat.name" :value="cat.id" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="createChannelDialog = false">取消</el-button>
+        <el-button type="primary" :loading="creatingChannel" @click="createChannel">创建</el-button>
+      </template>
+    </el-dialog>
+
     <UserPanel />
   </aside>
 </template>
@@ -524,74 +546,35 @@ function handleDeleteCategory(category: any) {
 }
 
 .server-name-bar {
-  position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding: 12px 16px;
   font-size: 15px;
   font-weight: 600;
-  cursor: pointer;
   border-bottom: 1px solid var(--divider-color, rgba(255, 255, 255, 6%));
-  transition: background-color 0.15s;
   user-select: none;
-
-  &:hover {
-    background-color: var(--bg-hover, rgba(255, 255, 255, 5%));
-  }
 }
 .server-name {
   overflow: hidden;
+  flex: 1;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.server-chevron {
+
+.new-category-btn {
   flex-shrink: 0;
+  padding: 2px 6px;
   font-size: 12px;
-  color: var(--font-secondary);
-  transition: transform 0.2s;
-  &.rotated {
-    transform: rotate(180deg);
-  }
-}
-.server-dropdown {
-  position: absolute;
-  top: 100%;
-  left: 8px;
-  z-index: 200;
-  width: 200px;
-  padding: 6px;
-  margin-top: 4px;
-  background-color: var(--background-wrapper, #272a37);
-  border: 1px solid var(--divider-color, rgba(255, 255, 255, 8%));
-  border-radius: 8px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 40%);
-}
-.dropdown-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-  font-size: 14px;
-  font-weight: 500;
   color: var(--font-secondary);
   cursor: pointer;
   border-radius: 4px;
-  transition: all 0.12s;
+  transition: all 0.15s;
+  white-space: nowrap;
+
   &:hover {
     color: var(--font-main);
-    background-color: var(--bg-hover, rgba(255, 255, 255, 6%));
+    background-color: var(--bg-hover);
   }
-}
-.dd-icon {
-  width: 20px;
-  text-align: center;
-  font-size: 14px;
-}
-.dropdown-sep {
-  height: 1px;
-  margin: 4px 8px;
-  background-color: var(--divider-color, rgba(255, 255, 255, 8%));
 }
 
 .channel-tree {
@@ -622,17 +605,9 @@ function handleDeleteCategory(category: any) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 12px 4px;
-  font-size: 12px;
-  color: var(--font-secondary, #949ba4);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  padding: 8px 12px 2px;
   cursor: default;
   user-select: none;
-
-  &:hover .category-more {
-    opacity: 1;
-  }
 }
 
 .category-left {
@@ -651,11 +626,11 @@ function handleDeleteCategory(category: any) {
   font-weight: 700;
   color: var(--font-secondary);
   cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.15s;
+  border-radius: 3px;
 
   &:hover {
     color: var(--font-main);
+    background-color: var(--bg-hover);
   }
 }
 
@@ -665,6 +640,7 @@ function handleDeleteCategory(category: any) {
 
 .arrow {
   font-size: 10px;
+  color: var(--font-secondary);
   transition: transform 0.2s;
 
   &.rotated {
@@ -675,25 +651,21 @@ function handleDeleteCategory(category: any) {
 .category-name {
   flex: 1;
   overflow: hidden;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--font-main);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.category-channels {
-  /* channels under this category */
-}
-
-.create-channel-bar {
-  padding: 8px 12px;
-  border-top: 1px solid var(--divider-color, rgba(255, 255, 255, 6%));
-}
-
-.create-btn {
-  padding: 6px;
-  font-size: 13px;
+.category-add {
+  flex-shrink: 0;
+  padding: 0 5px;
+  font-size: 14px;
+  font-weight: 600;
   color: var(--font-secondary);
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 3px;
 
   &:hover {
     color: var(--font-main);
@@ -701,8 +673,20 @@ function handleDeleteCategory(category: any) {
   }
 }
 
+.category-channels {
+  /* channels under this category */
+}
+
 .create-form {
   display: flex;
   gap: 4px;
+  padding: 6px 12px;
 }
+
+.create-form-inline {
+  display: flex;
+  gap: 4px;
+  padding: 4px 8px 8px 28px;
+}
+
 </style>

@@ -29,11 +29,6 @@ function goBackToServer() {
 <template>
   <div class="settings-page">
     <div class="settings-sidebar">
-      <div class="back-btn" @click="goBackToServer">
-        <span class="back-icon">←</span>
-        <span>返回服务器</span>
-      </div>
-      <div class="sidebar-divider" />
       <div
         v-for="t in tabs"
         :key="t.key"
@@ -45,6 +40,10 @@ function goBackToServer() {
       </div>
     </div>
     <div class="settings-content">
+      <div class="settings-top-bar">
+        <span class="top-bar-title">服务器设置</span>
+        <el-button text class="close-btn" @click="goBackToServer">✕</el-button>
+      </div>
       <SettingsOverview v-if="tab === 'overview'" />
       <SettingsRoles v-else-if="tab === 'roles'" />
       <SettingsEmoji v-else-if="tab === 'emoji'" />
@@ -69,34 +68,6 @@ function goBackToServer() {
   padding: 16px 8px;
   background-color: var(--background-secondary, #2b2d31);
   border-right: 1px solid var(--divider-color, rgba(255, 255, 255, 6%));
-}
-
-.back-btn {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  padding: 8px 12px;
-  font-size: 13px;
-  color: var(--font-secondary);
-  cursor: pointer;
-  border-radius: 6px;
-  transition: all 0.15s;
-  margin-bottom: 4px;
-
-  &:hover {
-    color: var(--font-main);
-    background-color: var(--bg-hover);
-  }
-}
-
-.back-icon {
-  font-size: 14px;
-}
-
-.sidebar-divider {
-  height: 1px;
-  margin: 8px 4px;
-  background: var(--divider-color, rgba(255, 255, 255, 8%));
 }
 
 .tab-item {
@@ -128,6 +99,29 @@ function goBackToServer() {
 
 .settings-content {
   flex: 1;
+  display: flex;
+  flex-direction: column;
   overflow-y: auto;
+}
+
+.settings-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px 12px;
+  border-bottom: 1px solid var(--divider-color, rgba(255, 255, 255, 6%));
+
+  .top-bar-title {
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .close-btn {
+    font-size: 18px;
+    color: var(--font-secondary);
+    &:hover {
+      color: var(--font-main);
+    }
+  }
 }
 </style>
