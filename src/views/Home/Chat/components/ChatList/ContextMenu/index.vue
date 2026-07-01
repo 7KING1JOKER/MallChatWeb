@@ -26,22 +26,52 @@ function replyTo() {
   chatStore.setReply(props.message)
 }
 
+// ✅ 修复删除消息 - 直接操作 messageMap
 async function deleteMsg() {
+  const channelId = globalStore.currentChannelId
+  if (!channelId) {
+    ElMessage.error('无法获取频道信息')
+    return
+  }
   try {
-    await apis.deleteMessage(props.message.channelId, props.message.id).send()
-    chatStore.deleteMessage(props.message.id)
-  } catch {
-    /* ignore */
+    await apis.deleteMessage(channelId, props.message.id).send()
+    
+    // ✅ 直接从 messageMap 中删除
+    const channelMap = chatStore.messageMap.get(channelId)
+    if (channelMap) {
+      const deleted = channelMap.delete(props.message.id)
+      if (deleted) {
+        ElMessage.success('消息已删除')
+      } else {
+        ElMessage.warning('消息已删除，请刷新页面查看')
+      }
+    } else {
+      ElMessage.warning('消息已删除，请刷新页面查看')
+    }
+  } catch (error) {
+    console.error('删除消息失败:', error)
+    ElMessage.error('删除消息失败')
   }
 }
 
+// ✅ 修复创建话题
 async function createThread() {
-  if (!globalStore.currentChannelId) return
+  const channelId = globalStore.currentChannelId
+  if (!channelId) {
+    ElMessage.error('无法获取频道信息')
+    return
+  }
   try {
-    await apis.createThread(globalStore.currentChannelId, { rootMsgId: props.message.id }).send()
+    const result = await apis.createThread(channelId, { rootMsgId: props.message.id }).send()
     ElMessage.success('话题已创建')
-  } catch {
-    ElMessage.error('创建话题失败')
+    
+    // ✅ 使用 chatStore 的 setMessageThread 方法更新消息
+    if (result?.thread) {
+      chatStore.setMessageThread(props.message.id, result.thread)
+    }
+  } catch (error) {
+    console.error('创建话题失败:', error)
+    ElMessage.error('创建话题失败，请查看控制台错误')
   }
 }
 
@@ -88,6 +118,10 @@ function onPickReaction(emoji: string) {
 }
 
 const emit = defineEmits<{ edit: [msgId: number] }>()
+
+function handleEdit() {
+  emit('edit', props.message.id)
+}
 </script>
 
 <template>
@@ -99,13 +133,11 @@ const emit = defineEmits<{ edit: [msgId: number] }>()
         class="menu-emoji"
         @click="toggleReaction(e)"
       >{{ e }}</span>
-      <!-- Reaction picker toggle -->
       <span class="menu-emoji picker-toggle" title="更多表情" @click="toggleReactionPicker">
         <span class="picker-toggle-icon">+</span>
       </span>
     </div>
 
-    <!-- Mini emoji picker popover -->
     <div v-if="showReactionPicker" class="reaction-picker-popover">
       <div class="reaction-picker-grid">
         <span
@@ -121,7 +153,7 @@ const emit = defineEmits<{ edit: [msgId: number] }>()
     <div class="menu-item" @click="replyTo()">
       <span class="menu-icon">↩</span> 回复
     </div>
-    <div v-if="isAuthor" class="menu-item" @click="$emit('edit', message.id)">
+    <div v-if="isAuthor" class="menu-item" @click="handleEdit">
       <span class="menu-icon">✏️</span> 编辑
     </div>
     <div v-if="isAuthor || canManage" class="menu-item danger" @click="deleteMsg()">
@@ -147,7 +179,6 @@ const emit = defineEmits<{ edit: [msgId: number] }>()
   border-radius: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 40%);
 
-  // 自己发送的消息靠右显示，弹窗应出现在左侧，避免遮挡消息内容
   &.is-me {
     right: auto;
     left: 16px;
@@ -193,7 +224,6 @@ const emit = defineEmits<{ edit: [msgId: number] }>()
   color: var(--font-secondary);
 }
 
-// ── Reaction Picker Popover ──
 .reaction-picker-popover {
   padding: 6px;
   margin-top: 2px;

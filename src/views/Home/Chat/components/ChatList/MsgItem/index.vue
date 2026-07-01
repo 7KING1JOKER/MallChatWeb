@@ -120,7 +120,7 @@ const editContent = ref('')
 
 function handleEdit(msgId: number) {
   editContent.value = props.message.content || ''
-  editing.value = true
+  editing.value = true  // ✅ 设置为 true，ContextMenu 会隐藏
 }
 
 async function saveEdit() {
@@ -128,7 +128,7 @@ async function saveEdit() {
   try {
     await apis.editMessage(globalStore.currentChannelId, props.message.id, { content: editContent.value }).send()
     chatStore.editMessage(props.message.id, editContent.value)
-    editing.value = false
+    editing.value = false  // ✅ 保存后关闭编辑模式
     ElMessage.success('消息已编辑')
   } catch {
     ElMessage.error('编辑失败')
@@ -136,7 +136,7 @@ async function saveEdit() {
 }
 
 function cancelEdit() {
-  editing.value = false
+  editing.value = false  // ✅ 取消后关闭编辑模式
   editContent.value = ''
 }
 
@@ -201,13 +201,15 @@ async function toggleReaction(emoji: string) {
         >
       </div>
     </div>
-    <ContextMenu :message="message" :is-me="isMe" @edit="handleEdit" />
+    <!-- ✅ 编辑时隐藏 ContextMenu -->
+    <ContextMenu v-if="!editing" :message="message" :is-me="isMe" @edit="handleEdit" />
   </div>
 </template>
 
 <style lang="scss" scoped>
 .msg-item {
   padding: 2px 16px;
+  position: relative;
 
   &:hover {
     background-color: var(--bg-hover, rgba(255, 255, 255, 2%));
