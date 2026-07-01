@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, reactive } from 'vue'
 import apis from '@/services/apis'
 import { PermissionBit } from '@/services/types'
+import { useUserStore } from '@/stores/user'
 import type {
   ServerVO,
   ServerDetailVO,
@@ -20,7 +21,7 @@ export const useServerStore = defineStore('server', () => {
   const members = ref<MemberVO[]>([])
   const memberCursor = reactive({ cursor: '', isLast: false })
   const roles = ref<RoleVO[]>([])
-  const onlineUsers = ref<Set<number>>(new Set())
+  const onlineUsers = ref<Record<number, boolean>>({})
 
   // ===== Server 列表 =====
   async function getMyServers() {
@@ -68,7 +69,7 @@ export const useServerStore = defineStore('server', () => {
     memberCursor.cursor = ''
     memberCursor.isLast = false
     roles.value = []
-    onlineUsers.value = new Set()
+    onlineUsers.value = {}
   }
 
   // ===== 成员 =====
@@ -116,19 +117,18 @@ export const useServerStore = defineStore('server', () => {
 
   // ===== 在线状态 =====
   function updateOnlineStatus(uid: number, online: boolean) {
-    if (online) {
-      onlineUsers.value.add(uid)
-    } else {
-      onlineUsers.value.delete(uid)
-    }
+    onlineUsers.value = { ...onlineUsers.value, [uid]: online }
   }
 
   function clearOnlineUsers() {
-    onlineUsers.value = new Set()
+    onlineUsers.value = {}
   }
 
   function isOnline(uid: number): boolean {
-    return onlineUsers.value.has(uid)
+    // 当前登录用户始终视为在线（服务端不会给自己推送 USER_ONLINE）
+    const userStore = useUserStore()
+    if (uid === userStore.userInfo?.id) return true
+    return !!onlineUsers.value[uid]
   }
 
   // ===== 权限判断 =====

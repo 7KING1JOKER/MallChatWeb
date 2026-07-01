@@ -115,12 +115,12 @@ class WS {
 
   /** 批量订阅频道 */
   subscribeChannel(channelIds: number[]) {
-    this.send({ type: WsRequestMsgType.SUBSCRIBE_CHANNEL, data: { channelIds } })
+    this.send({ type: WsRequestMsgType.SUBSCRIBE_CHANNEL, data: { channelId: channelIds[0] } })
   }
 
   /** 批量退订频道 */
   unsubscribeChannel(channelIds: number[]) {
-    this.send({ type: WsRequestMsgType.UNSUBSCRIBE_CHANNEL, data: { channelIds } })
+    this.send({ type: WsRequestMsgType.UNSUBSCRIBE_CHANNEL, data: { channelId: channelIds[0] } })
   }
 
   /** 订阅 Thread */
