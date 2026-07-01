@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import SettingsOverview from './SettingsOverview.vue'
 import SettingsRoles from './SettingsRoles.vue'
 import SettingsEmoji from './SettingsEmoji.vue'
 import SettingsInvites from './SettingsInvites.vue'
-import SettingsPermissions from './SettingsPermissions.vue'  // 取消注释
+import SettingsPermissions from './SettingsPermissions.vue'
 
 const route = useRoute()
+const router = useRouter()
 const tab = ref<'overview' | 'roles' | 'emoji' | 'invites' | 'permissions'>('overview')
 
 const serverId = computed(() => route.params.serverId as string)
@@ -19,11 +20,20 @@ const tabs = [
   { key: 'invites' as const, label: '邀请', icon: '🔗' },
   { key: 'permissions' as const, label: '频道权限', icon: '🔒' },
 ]
+
+function goBackToServer() {
+  router.push(`/servers/${serverId.value}/channels/`)
+}
 </script>
 
 <template>
   <div class="settings-page">
     <div class="settings-sidebar">
+      <div class="back-btn" @click="goBackToServer">
+        <span class="back-icon">←</span>
+        <span>返回服务器</span>
+      </div>
+      <div class="sidebar-divider" />
       <div
         v-for="t in tabs"
         :key="t.key"
@@ -59,6 +69,34 @@ const tabs = [
   padding: 16px 8px;
   background-color: var(--background-secondary, #2b2d31);
   border-right: 1px solid var(--divider-color, rgba(255, 255, 255, 6%));
+}
+
+.back-btn {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--font-secondary);
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.15s;
+  margin-bottom: 4px;
+
+  &:hover {
+    color: var(--font-main);
+    background-color: var(--bg-hover);
+  }
+}
+
+.back-icon {
+  font-size: 14px;
+}
+
+.sidebar-divider {
+  height: 1px;
+  margin: 8px 4px;
+  background: var(--divider-color, rgba(255, 255, 255, 8%));
 }
 
 .tab-item {

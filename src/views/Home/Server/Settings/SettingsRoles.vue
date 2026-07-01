@@ -58,9 +58,9 @@ function openCreate() {
 
 function openEdit(role: RoleVO) {
   editingRole.value = role
-  roleForm.name = role.name
+  roleForm.name = role.name || ''
   roleForm.color = role.color || '#5865f2'
-  roleForm.permissions = role.permissions
+  roleForm.permissions = role.permissions ?? 0
   showCreate.value = true
 }
 

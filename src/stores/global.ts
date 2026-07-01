@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, reactive } from 'vue'
 import apis from '@/services/apis'
 import wsIns from '@/utils/websocket'
+import { useServerStore } from '@/stores/server'
 
 export const useGlobalStore = defineStore('global', () => {
   const currentServerId = ref<number | null>(null)
@@ -15,6 +16,9 @@ export const useGlobalStore = defineStore('global', () => {
         wsIns.unsubscribeChannel([currentChannelId.value])
         currentChannelId.value = null
       }
+      // 切换服务器时清除旧的在线状态
+      const serverStore = useServerStore()
+      serverStore.clearOnlineUsers()
     }
     currentServerId.value = serverId
     currentThreadId.value = null

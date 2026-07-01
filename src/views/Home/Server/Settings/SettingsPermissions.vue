@@ -267,7 +267,12 @@ watch(() => serverStore.currentDetail, () => {
       <div class="permission-content">
         <div class="content-header">
           <h4>权限覆盖</h4>
-          <el-button size="small" type="primary" @click="openCreateModal">
+          <el-button
+            size="small"
+            type="primary"
+            :disabled="!selectedChannelId"
+            @click="openCreateModal"
+          >
             + 新增权限覆盖
           </el-button>
         </div>

@@ -4,41 +4,59 @@ import { Close } from '@element-plus/icons-vue'
 import { formatBytes, getFileSuffix } from '@/utils'
 import useDownloadQuenuStore from '@/stores/downloadQuenu'
 
+interface FileAttachment {
+  downloadUrl?: string
+  fileName?: string
+  fileSize?: number
+}
+
+const props = defineProps<{
+  body: {
+    content?: string
+    attachments?: FileAttachment[]
+    url?: string
+    fileName?: string
+    size?: number
+  }
+}>()
+
 const { downloadObjMap, download, quenu, cancelDownload } = useDownloadQuenuStore()
 
-const props = defineProps<{ body: { url: string; fileName?: string; size?: number } }>()
+// 优先从 attachments[0] 读取，兼容旧版顶层属性
+const firstAtt = computed(() => props.body.attachments?.[0])
+const fileUrl = computed(() => firstAtt.value?.downloadUrl || props.body.content || props.body.url || '')
+const fileName = computed(() => firstAtt.value?.fileName || props.body.fileName || '未知文件')
+const fileSize = computed(() => firstAtt.value?.fileSize || props.body.size || 0)
 
 // 下载文件
 const downloadFile = () => {
-  // 队列下载
-  download(props.body.url)
+  download(fileUrl.value)
 }
 
 const cancelDownloadFile = () => {
-  cancelDownload(props.body.url)
+  cancelDownload(fileUrl.value)
 }
 
-// 目前使用url作为map的key 但是url可能会重复 后面可以考虑使用id 或者 url + id 的形式
 const isDownloading = computed(() => {
-  return downloadObjMap.get(props.body.url)?.isDownloading || false
+  return downloadObjMap.get(fileUrl.value)?.isDownloading || false
 })
 
 const process = computed(() => {
-  return downloadObjMap.get(props.body.url)?.process || 0
+  return downloadObjMap.get(fileUrl.value)?.process || 0
 })
 
 // 是否排队中
 const isQuenu = computed(() => {
-  return quenu.includes(props.body.url)
+  return quenu.includes(fileUrl.value)
 })
 </script>
 
 <template>
   <div class="file">
-    <Icon :icon="getFileSuffix(body?.fileName ?? '')" :size="32" colorful />
+    <Icon :icon="getFileSuffix(fileName)" :size="32" colorful />
     <div class="file-desc">
-      <span class="file-name">{{ body?.fileName || '未知文件' }}</span>
-      <span class="file-size">{{ formatBytes(body?.size ?? 0) }}</span>
+      <span class="file-name">{{ fileName }}</span>
+      <span class="file-size">{{ formatBytes(fileSize) }}</span>
     </div>
     <el-text v-if="isQuenu" class="mx-1" size="small" type="warning" @click="cancelDownloadFile">
       等待下载

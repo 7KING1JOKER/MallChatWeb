@@ -11,6 +11,7 @@ import renderReplyContent from '@/utils/renderReplyContent'
 import apis from '@/services/apis'
 import ContextMenu from '../ContextMenu/index.vue'
 import RenderMessage from '@/components/RenderMessage/index.vue'
+import { ElMessage } from 'element-plus'
 
 const props = defineProps<{ message: MessageVO }>()
 const userStore = useUserStore()
@@ -113,6 +114,32 @@ const replyContent = computed(() =>
     : null,
 )
 
+// ── Edit message ──
+const editing = ref(false)
+const editContent = ref('')
+
+function handleEdit(msgId: number) {
+  editContent.value = props.message.content || ''
+  editing.value = true
+}
+
+async function saveEdit() {
+  if (!editContent.value.trim() || !globalStore.currentChannelId) return
+  try {
+    await apis.editMessage(globalStore.currentChannelId, props.message.id, { content: editContent.value }).send()
+    chatStore.editMessage(props.message.id, editContent.value)
+    editing.value = false
+    ElMessage.success('消息已编辑')
+  } catch {
+    ElMessage.error('编辑失败')
+  }
+}
+
+function cancelEdit() {
+  editing.value = false
+  editContent.value = ''
+}
+
 async function toggleReaction(emoji: string) {
   try {
     const data = await apis.addReaction(props.message.id, emoji).send()
@@ -142,7 +169,21 @@ async function toggleReaction(emoji: string) {
           <span v-if="isEdited" class="edited-tag">(已编辑)</span>
         </div>
         <div v-if="replyContent" class="reply-ref">{{ replyContent }}</div>
-        <RenderMessage :message="message" />
+        <RenderMessage v-if="!editing" :message="message" />
+        <div v-else class="edit-area">
+          <textarea
+            v-model="editContent"
+            class="edit-textarea"
+            rows="2"
+            @keydown.enter.exact.prevent="saveEdit"
+            @keydown.escape="cancelEdit"
+          />
+          <div class="edit-actions">
+            <span class="edit-hint">Esc 取消 · Enter 保存</span>
+            <el-button size="small" text @click="cancelEdit">取消</el-button>
+            <el-button size="small" type="primary" @click="saveEdit">保存</el-button>
+          </div>
+        </div>
         <div v-if="message.reactions?.length" class="reaction-row">
           <span
             v-for="r in message.reactions"
@@ -160,7 +201,7 @@ async function toggleReaction(emoji: string) {
         >
       </div>
     </div>
-    <ContextMenu :message="message" />
+    <ContextMenu :message="message" :is-me="isMe" @edit="handleEdit" />
   </div>
 </template>
 
@@ -170,6 +211,26 @@ async function toggleReaction(emoji: string) {
 
   &:hover {
     background-color: var(--bg-hover, rgba(255, 255, 255, 2%));
+  }
+
+  &.is-me {
+    .msg-content {
+      flex-direction: row-reverse;
+    }
+
+    .msg-body {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    .msg-header {
+      flex-direction: row-reverse;
+    }
+
+    .msg-avatar {
+      margin-left: 0;
+    }
   }
 }
 
@@ -262,5 +323,41 @@ async function toggleReaction(emoji: string) {
   &:hover {
     text-decoration: underline;
   }
+}
+
+.edit-area {
+  margin: 4px 0;
+}
+
+.edit-textarea {
+  width: 100%;
+  padding: 8px 10px;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--font-main);
+  resize: vertical;
+  background: var(--bg-input, rgba(255, 255, 255, 5%));
+  border: 1px solid var(--el-color-primary);
+  border-radius: 6px;
+  outline: none;
+
+  &::placeholder {
+    color: var(--font-secondary);
+  }
+}
+
+.edit-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.edit-hint {
+  font-size: 11px;
+  color: var(--font-secondary);
+  margin-right: auto;
 }
 </style>

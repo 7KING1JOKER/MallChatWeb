@@ -123,6 +123,10 @@ export const useServerStore = defineStore('server', () => {
     }
   }
 
+  function clearOnlineUsers() {
+    onlineUsers.value = new Set()
+  }
+
   function isOnline(uid: number): boolean {
     return onlineUsers.value.has(uid)
   }
@@ -182,6 +186,7 @@ export const useServerStore = defineStore('server', () => {
     updateMemberRole,
     getRoles,
     updateOnlineStatus,
+    clearOnlineUsers,
     isOnline,
     hasPermission,
     updateChannel,

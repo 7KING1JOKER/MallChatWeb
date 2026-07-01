@@ -68,10 +68,19 @@ async function sendText() {
   }
   wsIns.sendTypingStop(globalStore.currentChannelId)
   const fileIds = pendingFileIds.value.length ? pendingFileIds.value : undefined
+  // 根据文件类型决定 msgType：图片→IMAGE，其他文件→FILE，无文件→TEXT
+  let msgType = MessageType.TEXT
+  if (fileIds && fileIds.length > 0) {
+    const firstAtt = fileAttachments.value.find(f => f.done)
+    if (firstAtt) {
+      const isImage = /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(firstAtt.name)
+      msgType = isImage ? MessageType.IMAGE : MessageType.FILE
+    }
+  }
   await chatStore.sendMessage?.({
     channelId: globalStore.currentChannelId,
     content: text || '',
-    msgType: MessageType.TEXT,
+    msgType,
     replyMsgId: replyMsg.value?.id,
     threadId: globalStore.currentThreadId || undefined,
     fileIds,
@@ -114,6 +123,7 @@ function onMentionSelect(nickname: string) {
 }
 
 // ── Emoji Picker ──
+const emojiBtnRef = ref<HTMLElement | null>(null)
 function toggleEmojiPicker() {
   showEmojiPicker.value = !showEmojiPicker.value
 }
@@ -247,6 +257,7 @@ function onKeydown(e: KeyboardEvent) {
     <div class="input-row">
       <!-- Emoji picker button -->
       <button
+        ref="emojiBtnRef"
         class="toolbar-btn"
         title="表情"
         @click="toggleEmojiPicker"
@@ -289,6 +300,7 @@ function onKeydown(e: KeyboardEvent) {
       v-if="globalStore.currentServerId"
       :server-id="globalStore.currentServerId"
       :visible="showEmojiPicker"
+      :trigger-el="emojiBtnRef"
       @select-unicode="onSelectUnicode"
       @select-sticker="onSelectSticker"
       @close="showEmojiPicker = false"

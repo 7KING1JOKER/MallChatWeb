@@ -3,26 +3,43 @@ import { computed, ref } from 'vue'
 import { useImgPreviewStore } from '@/stores/preview'
 import { formatImage } from '@/utils'
 
-const props = defineProps<{ body: { url?: string; width: number; height: number } }>()
+interface FileAttachment {
+  downloadUrl?: string
+  width?: number
+  height?: number
+}
+
+const props = defineProps<{
+  body: {
+    content?: string
+    attachments?: FileAttachment[]
+    url?: string
+    width?: number
+    height?: number
+  }
+}>()
 
 const imageStore = useImgPreviewStore()
 const hasLoadError = ref(false)
 const isLoading = ref(true)
 
+// 优先从 attachments[0] 读取，兼容旧版顶层 url 属性
+const firstAtt = computed(() => props.body.attachments?.[0])
+const imageUrl = computed(() => firstAtt.value?.downloadUrl || props.body.content || props.body.url || '')
+const imageWidth = computed(() => firstAtt.value?.width || props.body.width || 0)
+const imageHeight = computed(() => firstAtt.value?.height || props.body.height || 0)
+
 /**
- * 核心就是的到高度，产生明确占位防止图片加载时页面抖动
- * @param width 宽度
- * @param height 高度
+ * 核心就是得到高度，产生明确占位防止图片加载时页面抖动
  */
 const getImageHeight = computed(() => {
-  const { width, height } = props.body
-  return formatImage(width, height)
+  return formatImage(imageWidth.value, imageHeight.value)
 })
 
 // 没有图片的情况下计算出按比例的宽度
 const getWidthStyle = () => {
-  const { width, height } = props.body
-  return `width: ${(getImageHeight.value / height) * width}px`
+  if (imageHeight.value === 0) return ''
+  return `width: ${(getImageHeight.value / imageHeight.value) * imageWidth.value}px`
 }
 
 const handleError = () => {
@@ -35,7 +52,7 @@ const handleError = () => {
   <div
     class="image"
     :style="{ height: getImageHeight + 'px' }"
-    @click="imageStore.show(body?.url as string)"
+    @click="imageStore.show(imageUrl)"
   >
     <div v-if="hasLoadError" class="image-slot" :style="getWidthStyle()">
       <Icon icon="dazed" :size="36" colorful />
@@ -43,12 +60,13 @@ const handleError = () => {
     </div>
     <template v-else>
       <img
-        v-if="body?.url"
-        :src="body?.url"
+        v-if="imageUrl"
+        :src="imageUrl"
         draggable="false"
-        @click="imageStore.show(body?.url as string)"
+        @click="imageStore.show(imageUrl)"
         @error="handleError"
-        :alt="body?.url"
+        @load="isLoading = false"
+        :alt="imageUrl"
       />
     </template>
   </div>

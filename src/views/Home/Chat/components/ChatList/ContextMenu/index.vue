@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { ElMessage } from 'element-plus'
 import apis from '@/services/apis'
 import type { MessageVO } from '@/services/types'
 import { useUserStore } from '@/stores/user'
@@ -8,7 +9,7 @@ import { useServerStore } from '@/stores/server'
 import { useGlobalStore } from '@/stores/global'
 import { PermissionBit } from '@/services/types'
 
-const props = defineProps<{ message: MessageVO }>()
+const props = defineProps<{ message: MessageVO; isMe?: boolean }>()
 const userStore = useUserStore()
 const chatStore = useChatStore()
 const serverStore = useServerStore()
@@ -38,8 +39,9 @@ async function createThread() {
   if (!globalStore.currentChannelId) return
   try {
     await apis.createThread(globalStore.currentChannelId, { rootMsgId: props.message.id }).send()
+    ElMessage.success('话题已创建')
   } catch {
-    /* ignore */
+    ElMessage.error('创建话题失败')
   }
 }
 
@@ -89,7 +91,7 @@ const emit = defineEmits<{ edit: [msgId: number] }>()
 </script>
 
 <template>
-  <div class="context-menu">
+  <div :class="['context-menu', { 'is-me': isMe }]">
     <div class="emoji-row">
       <span
         v-for="e in quickEmojis"
@@ -144,6 +146,12 @@ const emit = defineEmits<{ edit: [msgId: number] }>()
   border: 1px solid var(--divider-color, rgba(255, 255, 255, 8%));
   border-radius: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 40%);
+
+  // 自己发送的消息靠右显示，弹窗应出现在左侧，避免遮挡消息内容
+  &.is-me {
+    right: auto;
+    left: 16px;
+  }
 }
 
 .msg-item:hover .context-menu {

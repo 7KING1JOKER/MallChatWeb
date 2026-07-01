@@ -33,9 +33,6 @@ onUnmounted(() => {
         <RouterView />
       </div>
     </div>
-    <footer class="footer">
-      <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">闽ICP备2023004110号</a>
-    </footer>
     <el-image-viewer
       v-if="imageStore.isShowing"
       :z-index="5000"

@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useEmojiStore } from '@/stores/emoji'
 import type { EmojiVO } from '@/services/types'
 
 const props = defineProps<{
   serverId: number
   visible: boolean
+  triggerEl?: HTMLElement | null
 }>()
 
 const emit = defineEmits<{
@@ -77,67 +78,101 @@ function onKeydown(e: KeyboardEvent) {
   if (e.key === 'Escape') onClose()
 }
 
-// Initially register keydown listener
 if (typeof window !== 'undefined') {
   window.addEventListener('keydown', onKeydown as any)
 }
+
+// ── Dynamic positioning ──
+const pickerStyle = ref<Record<string, string>>({})
+
+watch(
+  () => props.visible,
+  (v) => {
+    if (v && props.triggerEl) {
+      const rect = props.triggerEl.getBoundingClientRect()
+      const pickerWidth = 340
+      const pickerHeight = 360
+      // Position above the trigger button, aligned to its left edge
+      let left = rect.left
+      let top = rect.top - 8 // 8px gap above trigger
+      // If picker would overflow right edge of viewport
+      if (left + pickerWidth > window.innerWidth - 8) {
+        left = window.innerWidth - pickerWidth - 8
+      }
+      // If picker would overflow left edge
+      if (left < 8) left = 8
+      // If picker would overflow top, position below trigger instead
+      if (top - pickerHeight < 8) {
+        top = rect.bottom + 8
+      } else {
+        top = top - pickerHeight
+      }
+      pickerStyle.value = {
+        position: 'fixed',
+        left: `${left}px`,
+        top: `${top}px`,
+        width: `${pickerWidth}px`,
+        maxHeight: `${pickerHeight}px`,
+        zIndex: '10001',
+      }
+    }
+  },
+)
 </script>
 
 <template>
-  <Teleport to="body">
-    <div v-if="visible" class="emoji-picker-overlay" @click.self="onClose">
-      <div class="emoji-picker">
-        <!-- Tabs -->
-        <div class="picker-tabs">
-          <button
-            :class="['picker-tab', { active: activeTab === 'unicode' }]"
-            @click="activeTab = 'unicode'"
-          >
-            😊 表情
-          </button>
-          <button
-            :class="['picker-tab', { active: activeTab === 'server' }]"
-            @click="activeTab = 'server'"
-          >
-            <span>🖼️ 自定义</span>
-            <span v-if="customEmojis.length" class="tab-count">{{ customEmojis.length }}</span>
-          </button>
-          <button class="picker-close" @click="onClose">✕</button>
-        </div>
+  <div v-if="visible" class="emoji-picker-overlay" @click.self="onClose">
+    <div class="emoji-picker" :style="pickerStyle">
+      <!-- Tabs -->
+      <div class="picker-tabs">
+        <button
+          :class="['picker-tab', { active: activeTab === 'unicode' }]"
+          @click="activeTab = 'unicode'"
+        >
+          😊 表情
+        </button>
+        <button
+          :class="['picker-tab', { active: activeTab === 'server' }]"
+          @click="activeTab = 'server'"
+        >
+          <span>🖼️ 自定义</span>
+          <span v-if="customEmojis.length" class="tab-count">{{ customEmojis.length }}</span>
+        </button>
+        <button class="picker-close" @click="onClose">✕</button>
+      </div>
 
-        <!-- Unicode Grid -->
-        <div v-if="activeTab === 'unicode'" class="picker-body unicode-grid">
-          <button
-            v-for="emoji in unicodeEmojis"
-            :key="emoji"
-            class="emoji-btn"
-            :title="emoji"
-            @click="onSelectUnicode(emoji)"
-          >
-            {{ emoji }}
-          </button>
-        </div>
+      <!-- Unicode Grid -->
+      <div v-if="activeTab === 'unicode'" class="picker-body unicode-grid">
+        <button
+          v-for="emoji in unicodeEmojis"
+          :key="emoji"
+          class="emoji-btn"
+          :title="emoji"
+          @click="onSelectUnicode(emoji)"
+        >
+          {{ emoji }}
+        </button>
+      </div>
 
-        <!-- Server Custom Emoji Grid -->
-        <div v-if="activeTab === 'server'" class="picker-body server-grid">
-          <div
-            v-for="emoji in customEmojis"
-            :key="emoji.id"
-            class="sticker-btn"
-            :title="emoji.name"
-            @click="onSelectSticker(emoji)"
-          >
-            <img :src="emoji.url" :alt="emoji.name" class="sticker-img" loading="lazy" />
-            <span class="sticker-name">{{ emoji.name }}</span>
-          </div>
-          <div v-if="!customEmojis.length" class="empty-hint">
-            <span>暂无自定义表情</span>
-            <span class="hint-sub">前往 服务器设置 → 表情管理 上传</span>
-          </div>
+      <!-- Server Custom Emoji Grid -->
+      <div v-if="activeTab === 'server'" class="picker-body server-grid">
+        <div
+          v-for="emoji in customEmojis"
+          :key="emoji.id"
+          class="sticker-btn"
+          :title="emoji.name"
+          @click="onSelectSticker(emoji)"
+        >
+          <img :src="emoji.url" :alt="emoji.name" class="sticker-img" loading="lazy" />
+          <span class="sticker-name">{{ emoji.name }}</span>
+        </div>
+        <div v-if="!customEmojis.length" class="empty-hint">
+          <span>暂无自定义表情</span>
+          <span class="hint-sub">前往 服务器设置 → 表情管理 上传</span>
         </div>
       </div>
     </div>
-  </Teleport>
+  </div>
 </template>
 
 <style lang="scss" scoped>
@@ -148,11 +183,6 @@ if (typeof window !== 'undefined') {
 }
 
 .emoji-picker {
-  position: absolute;
-  bottom: 80px;
-  left: 16px;
-  width: 340px;
-  max-height: 360px;
   display: flex;
   flex-direction: column;
   background: var(--background-wrapper, #1e1f22);
