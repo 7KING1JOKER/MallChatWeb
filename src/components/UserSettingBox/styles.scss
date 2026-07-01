@@ -52,7 +52,11 @@
 }
 
 .setting-tips {
-  width: fit-content;
+  margin: 12px 0 45px;
+  font-size: 12px;
+  color: var(--font-secondary);
+  text-align: center;
+  opacity: 0.7;
 }
 
 .setting-name {

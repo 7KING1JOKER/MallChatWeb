@@ -328,17 +328,9 @@ function logout() {
             @click="onCancelServerNickname"
           />
         </div>
-        <div class="server-nickname-hint">
-          💡 为空时自动使用全局昵称
-        </div>
       </div>
 
-      <el-alert
-        class="setting-tips"
-        title="Tips: 昵称在服务器内可单独设置（服务器昵称）"
-        type="info"
-        :closable="false"
-      />
+      <p class="setting-tips">💡 昵称在服务器内可单独设置（服务器昵称）</p>
       <el-button type="danger" class="logout-btn" @click="logout">退出登录</el-button>
     </div>
   </ElDialog>
