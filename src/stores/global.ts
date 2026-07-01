@@ -32,6 +32,8 @@ export const useGlobalStore = defineStore('global', () => {
     currentChannelId.value = channelId
     currentThreadId.value = null
     wsIns.subscribeChannel([channelId])
+    // 进入频道即视为已读，清除未读计数
+    unreadCounts.set(channelId, 0)
   }
 
   function enterThread(threadId: number) {
