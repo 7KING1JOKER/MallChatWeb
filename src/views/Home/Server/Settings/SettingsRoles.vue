@@ -14,24 +14,7 @@ const globalStore = useGlobalStore()
 
 const serverId = computed(() => Number(route.params.serverId))
 
-onMounted(async () => {
-  const sid = serverId.value
-  if (sid && sid !== globalStore.currentServerId) {
-    await globalStore.enterServer(sid)
-    await serverStore.getServerDetail(sid)
-  }
-  await serverStore.getRoles(sid)
-})
-
-// 创建/编辑角色弹窗
-const showCreate = ref(false)
-const editingRole = ref<RoleVO | null>(null)
-const roleForm = reactive({ name: '', color: '#5865f2', permissions: 0 })
-
-const PERMISSION_OPTIONS = Object.entries(PermissionBit)
-  .filter(([k]) => typeof k === 'string' && isNaN(Number(k)))
-  .map(([label, bit]) => ({ label, bit: bit as number, desc: PERM_LABEL_MAP[label] || label }))
-
+// ✅ 先定义 PERM_LABEL_MAP（修复 TDZ 问题）
 const PERM_LABEL_MAP: Record<string, string> = {
   CREATE_INVITE: '创建邀请',
   KICK_MEMBERS: '踢出成员',
@@ -47,6 +30,25 @@ const PERM_LABEL_MAP: Record<string, string> = {
   MENTION_EVERYONE: '@全体成员',
   MANAGE_ROLES: '管理角色',
 }
+
+// ✅ 添加类型断言，修复 TypeScript 类型错误
+const PERMISSION_OPTIONS = (Object.entries(PermissionBit) as [string, number][])
+  .filter(([k]) => typeof k === 'string' && isNaN(Number(k)))
+  .map(([label, bit]) => ({ label, bit: bit as number, desc: PERM_LABEL_MAP[label] || label }))
+
+onMounted(async () => {
+  const sid = serverId.value
+  if (sid && sid !== globalStore.currentServerId) {
+    await globalStore.enterServer(sid)
+    await serverStore.getServerDetail(sid)
+  }
+  await serverStore.getRoles(sid)
+})
+
+// 创建/编辑角色弹窗
+const showCreate = ref(false)
+const editingRole = ref<RoleVO | null>(null)
+const roleForm = reactive({ name: '', color: '#5865f2', permissions: 0 })
 
 function openCreate() {
   editingRole.value = null
@@ -116,7 +118,11 @@ const isEveryone = (role: RoleVO) => role.name === '@everyone'
       <el-button type="primary" size="small" @click="openCreate">+ 新建角色</el-button>
     </div>
 
-    <div class="role-cards">
+    <!-- ✅ 增加加载状态保护 -->
+    <div v-if="!serverStore.roles || serverStore.roles.length === 0" class="empty-tip">
+      暂无角色，点击右上角新建
+    </div>
+    <div v-else class="role-cards">
       <div v-for="role in serverStore.roles" :key="role.id" class="role-card">
         <div class="role-card-header">
           <span class="role-color" :style="{ backgroundColor: role.color || '#5865f2' }"></span>
@@ -273,6 +279,13 @@ const isEveryone = (role: RoleVO) => role.name === '@everyone'
 }
 
 .perm-label {
+  font-size: 14px;
+}
+
+.empty-tip {
+  padding: 40px 0;
+  text-align: center;
+  color: var(--font-secondary);
   font-size: 14px;
 }
 </style>
