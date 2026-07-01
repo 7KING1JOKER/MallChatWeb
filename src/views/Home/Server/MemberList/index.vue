@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useServerStore } from '@/stores/server'
 import { useGlobalStore } from '@/stores/global'
@@ -10,6 +10,7 @@ import type { MemberVO, RoleVO } from '@/services/types'
 import apis from '@/services/apis'
 
 const route = useRoute()
+const router = useRouter()
 const serverStore = useServerStore()
 const globalStore = useGlobalStore()
 const userStore = useUserStore()
@@ -27,6 +28,18 @@ onMounted(async () => {
   await loadMembers()
   await serverStore.getRoles(serverId.value)
 })
+
+function goBack() {
+  const sid = serverId.value
+  const cid = globalStore.currentChannelId
+  if (cid && sid) {
+    router.push(`/servers/${sid}/channels/${cid}`)
+  } else if (sid) {
+    router.push(`/servers/${sid}`)
+  } else {
+    router.back()
+  }
+}
 
 async function loadMembers() {
   loading.value = true
@@ -157,8 +170,11 @@ async function assignRole(roleId: number) {
 <template>
   <div class="member-page">
     <div class="page-header">
-      <h2>👥 成员列表</h2>
-      <span class="member-count">{{ serverStore.members.length }} 人</span>
+      <div class="header-left">
+        <h2>👥 成员列表</h2>
+        <span class="member-count">{{ serverStore.members.length }} 人</span>
+      </div>
+      <el-button text class="close-btn" @click="goBack">✕</el-button>
     </div>
     <div class="search-bar">
       <el-input
@@ -276,14 +292,28 @@ async function assignRole(roleId: number) {
 
 .page-header {
   display: flex;
-  gap: 12px;
-  align-items: baseline;
+  align-items: center;
+  justify-content: space-between;
   padding: 20px 24px 12px;
+
+  .header-left {
+    display: flex;
+    gap: 12px;
+    align-items: baseline;
+  }
 
   h2 {
     margin: 0;
     font-size: 20px;
     font-weight: 700;
+  }
+
+  .close-btn {
+    font-size: 18px;
+    color: var(--font-secondary);
+    &:hover {
+      color: var(--font-main);
+    }
   }
 }
 

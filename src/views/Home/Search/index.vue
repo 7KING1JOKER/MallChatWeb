@@ -2,16 +2,31 @@
 import { ref } from 'vue'
 import apis from '@/services/apis'
 import type { MessageVO } from '@/services/types'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { useGlobalStore } from '@/stores/global'
 
 const route = useRoute()
+const router = useRouter()
+const globalStore = useGlobalStore()
 const keyword = ref('')
 const results = ref<MessageVO[]>([])
 const loading = ref(false)
 const searched = ref(false)
 const searchError = ref('')
 const reindexing = ref(false)
+
+function goBack() {
+  const sid = Number(route.params.serverId)
+  const cid = globalStore.currentChannelId
+  if (cid && sid) {
+    router.push(`/servers/${sid}/channels/${cid}`)
+  } else if (sid) {
+    router.push(`/servers/${sid}`)
+  } else {
+    router.back()
+  }
+}
 
 async function search() {
   const sid = Number(route.params.serverId)
@@ -51,6 +66,10 @@ async function reindex() {
 </script>
 <template>
   <div class="search-page">
+    <div class="page-header">
+      <h2>🔍 搜索消息</h2>
+      <el-button text class="close-btn" @click="goBack">✕</el-button>
+    </div>
     <div class="search-bar">
       <el-input v-model="keyword" placeholder="搜索消息..." @keydown.enter="search">
         <template #append><el-button @click="search">搜索</el-button></template>
@@ -83,6 +102,27 @@ async function reindex() {
   height: 100%;
   padding: 24px;
   overflow-y: auto;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+
+  h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .close-btn {
+    font-size: 18px;
+    color: var(--font-secondary);
+    &:hover {
+      color: var(--font-main);
+    }
+  }
 }
 
 .search-bar {
